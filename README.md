@@ -1,1 +1,11 @@
-# shotkaiseki
+# shotkaiseki（ショット解析）
+
+iPhoneのカメラだけでゴルフの弾道（初速・打ち出し角・キャリー）を測るWebアプリ。
+単一HTML・インストール不要・外部通信なしで動作する。
+
+## 現在の版
+- v0.1 カメラ確認ページ：画面内カメラの実測fps・ズーム操作の可否・傾きセンサー、
+  撮影/ライブラリ動画のfpsと撮影情報（焦点距離）の確認
+
+## 公開URL
+https://yuuapps.github.io/shotkaiseki/

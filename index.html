@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ショット解析 カメラ確認</title>
+<style>
+:root{--bg:#0b0f0d;--panel:#151b18;--line:#2a332e;--fg:#eef3ef;--sub:#9aa8a0;--acc:#7ee08a;--warn:#ffb347;--ng:#ff6b6b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;font-size:15px}
+header{padding:calc(env(safe-area-inset-top) + 10px) 16px 8px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:17px;margin:0}
+header small{color:var(--sub)}
+main{padding:0 16px calc(env(safe-area-inset-bottom) + 24px)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}
+h2{font-size:15px;margin:0 0 8px;color:var(--acc)}
+p.note{color:var(--sub);font-size:13px;margin:4px 0 8px;line-height:1.5}
+button,select,label.btn{font:inherit;color:var(--fg);background:#24302a;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:3px 4px 3px 0;cursor:pointer}
+button.primary,label.primary{background:#2f6b3a;border-color:#3f8a4c}
+label.btn input{display:none}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+#stage{position:relative;background:#000;border-radius:10px;overflow:hidden;width:100%;aspect-ratio:9/16;max-height:72vh;margin:8px auto 0}
+#stage.land{aspect-ratio:16/9}
+#cam{width:100%;height:100%;object-fit:contain;display:block}
+#guide,#diffc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#diffc{opacity:.75;mix-blend-mode:screen;image-rendering:pixelated}
+#hud{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.55);border-radius:8px;padding:6px 9px;font-size:13px;line-height:1.5;font-variant-numeric:tabular-nums}
+#motion{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.55);border-radius:8px;padding:6px 9px;font-size:13px}
+#motion.hit{background:var(--ng)}
+input[type=range]{width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td{border-bottom:1px solid var(--line);padding:5px 4px;vertical-align:top;word-break:break-all}
+td:first-child{color:var(--sub);width:42%}
+.ok{color:var(--acc)}.ng{color:var(--ng)}.warn{color:var(--warn)}
+pre{white-space:pre-wrap;word-break:break-all;background:#0e1311;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;max-height:260px;overflow:auto}
+</style>
+</head>
+<body>
+<header><h1>ショット解析 <small>カメラ確認 v0.1</small></h1></header>
+<main>
+
+<section>
+  <h2>① 画面内カメラ（リアルタイム用）</h2>
+  <p class="note">fpsと解像度を選んで「カメラ開始」。下の表に実際に出た値が表示されます。120fpsが出るかも試してください。</p>
+  <div class="row">
+    <select id="selFps"><option value="30">30fps</option><option value="60" selected>60fps</option><option value="120">120fps</option><option value="240">240fps</option></select>
+    <select id="selRes"><option value="1280x720">720p</option><option value="1920x1080" selected>1080p</option><option value="3840x2160">4K</option></select>
+    <select id="selDev"><option value="">背面カメラ（自動）</option></select>
+    <button class="primary" id="btnStart">カメラ開始</button>
+    <button id="btnStop">停止</button>
+  </div>
+  <div class="row">
+    <button id="btnOrient">縦/横 切替</button>
+    <button id="btnGuide">人型枠 表示/非表示</button>
+    <button id="btnDiff">動き検出 表示/非表示</button>
+    <button id="btnGyro">傾きセンサー許可</button>
+  </div>
+  <div id="stage">
+    <video id="cam" playsinline muted autoplay></video>
+    <canvas id="diffc"></canvas>
+    <svg id="guide" viewBox="0 0 90 160" preserveAspectRatio="xMidYMid meet">
+      <g fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+        <path d="M14 30 v-8 a4 4 0 0 1 4-4 h9 M63 18 h9 a4 4 0 0 1 4 4 v8 M14 130 v8 a4 4 0 0 0 4 4 h9 M63 142 h9 a4 4 0 0 0 4-4 v-8"/>
+      </g>
+      <g fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".6">
+        <circle cx="38" cy="50" r="5.5"/>
+        <path d="M35 56 L28 80 L30 92 M28 80 L36 82"/>
+        <path d="M30 92 L27 110 L26 128 L33 128 M30 92 L36 108 L37 126 L44 126"/>
+        <path d="M36 60 L42 76 L45 82 M33 62 L40 78 L45 82"/>
+        <path d="M45 82 L60 124 L65 125"/>
+      </g>
+    </svg>
+    <div id="hud">—</div>
+    <div id="motion">動き —</div>
+  </div>
+  <div id="zoomBox" style="display:none;margin-top:10px">
+    <div class="row" style="justify-content:space-between"><span>ズーム</span><b id="zoomVal">—</b></div>
+    <input type="range" id="zoom" min="1" max="10" step="0.01" value="1">
+  </div>
+  <table id="camTbl" style="margin-top:8px"></table>
+</section>
+
+<section>
+  <h2>② 撮影画面を呼び出す / ③ ライブラリから選ぶ</h2>
+  <p class="note">②はiPhoneの撮影画面が開きます。③は写真ライブラリのスローモーション動画（120fps）を選んでください。ファイルの中身（実際のfps・撮影情報）を調べます。</p>
+  <div class="row">
+    <label class="btn primary">② 撮影する<input type="file" id="fCap" accept="video/*" capture="environment"></label>
+    <label class="btn primary">③ ライブラリから選ぶ<input type="file" id="fLib" accept="video/*"></label>
+  </div>
+  <video id="fvid" playsinline muted controls style="width:100%;margin-top:8px;display:none;border-radius:8px"></video>
+  <table id="fileTbl" style="margin-top:8px"></table>
+  <details style="margin-top:8px"><summary style="color:var(--sub)">撮影情報（メタデータ）の一覧</summary><pre id="metaPre">—</pre></details>
+</section>
+
+<section>
+  <h2>結果を送る</h2>
+  <p class="note">①〜③を試したら「結果をコピー」を押し、そのままClaudeに貼り付けてください。</p>
+  <button class="primary" id="btnCopy">結果をコピー</button>
+  <pre id="report">—</pre>
+</section>
+
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const R={device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
+let stream=null,track=null,showDiff=false,landscape=false;
+
+function table(el,obj){el.innerHTML=Object.entries(obj).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");}
+function fmt(v){return typeof v==="object"?JSON.stringify(v):String(v)}
+function updReport(){$("report").textContent=JSON.stringify(R,null,1);}
+
+/* ---------- ① live camera ---------- */
+async function listDevices(){
+  try{
+    const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    const sel=$("selDev"),cur=sel.value;
+    sel.innerHTML='<option value="">背面カメラ（自動）</option>'+devs.map((d,i)=>`<option value="${d.deviceId}">${d.label||"カメラ"+(i+1)}</option>`).join("");
+    sel.value=cur;R.camera.devices=devs.map(d=>d.label);
+  }catch(e){}
+}
+async function startCam(){
+  stopCam();
+  const fps=+$("selFps").value,[w,h]=$("selRes").value.split("x").map(Number),dev=$("selDev").value;
+  const v={width:{ideal:w},height:{ideal:h},frameRate:{ideal:fps,min:Math.min(fps,30)}};
+  if(dev)v.deviceId={exact:dev};else v.facingMode={ideal:"environment"};
+  R.camera.request={fps,res:`${w}x${h}`,device:$("selDev").selectedOptions[0].text};
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:v,audio:false});
+  }catch(e){
+    try{delete v.frameRate.min;stream=await navigator.mediaDevices.getUserMedia({video:v,audio:false});}
+    catch(e2){R.camera.error=e2.name+": "+e2.message;table($("camTbl"),{"エラー":R.camera.error});updReport();return;}
+  }
+  track=stream.getVideoTracks()[0];
+  $("cam").srcObject=stream;await $("cam").play().catch(()=>{});
+  await listDevices();
+  const s=track.getSettings?track.getSettings():{},c=track.getCapabilities?track.getCapabilities():{};
+  R.camera.label=track.label;R.camera.settings=s;R.camera.capabilities=c;
+  setupZoom(c,s);
+  startFpsMeter();
+  showCamTable();
+}
+function stopCam(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;track=null;}
+}
+function showCamTable(){
+  const s=R.camera.settings||{},c=R.camera.capabilities||{};
+  table($("camTbl"),{
+    "使用カメラ":R.camera.label||"—",
+    "設定された解像度":`${s.width||"?"}×${s.height||"?"}`,
+    "設定されたfps":s.frameRate!=null?s.frameRate.toFixed?s.frameRate.toFixed(1):s.frameRate:"?",
+    "実測fps":R.camera.measuredFps!=null?`<b class="${R.camera.measuredFps>=55?"ok":"warn"}">${R.camera.measuredFps.toFixed(1)}</b>`:"計測中…",
+    "fpsの上限（端末申告）":c.frameRate?fmt(c.frameRate):"不明",
+    "ズーム操作":c.zoom?`<span class="ok">可</span> ${c.zoom.min}〜${c.zoom.max}`:'<span class="ng">不可（またはこのカメラでは非対応）</span>',
+    "現在のズーム":s.zoom!=null?s.zoom:"—",
+    "解像度の上限":c.width?`${c.width.max}×${c.height.max}`:"不明",
+    "傾き（前後/左右）":R.camera.tilt||"未許可",
+  });
+  updReport();
+}
+function setupZoom(c,s){
+  const box=$("zoomBox"),z=$("zoom");
+  if(!c.zoom){box.style.display="none";return;}
+  box.style.display="";z.min=c.zoom.min;z.max=c.zoom.max;z.step=c.zoom.step||0.01;z.value=s.zoom||c.zoom.min;$("zoomVal").textContent=(+z.value).toFixed(2)+"×";
+}
+$("zoom").addEventListener("input",async e=>{
+  if(!track)return;const v=+e.target.value;$("zoomVal").textContent=v.toFixed(2)+"×";
+  try{await track.applyConstraints({advanced:[{zoom:v}]});R.camera.settings=track.getSettings();R.camera.zoomApplied=true;}catch(err){R.camera.zoomError=err.message;}
+  showCamTable();
+});
+
+/* fps meter + motion detection, using requestVideoFrameCallback when available */
+const dc=$("diffc"),dctx=dc.getContext("2d",{willReadFrequently:true});
+const off=document.createElement("canvas"),octx=off.getContext("2d",{willReadFrequently:true});
+let prev=null,lastMotion=0;
+function startFpsMeter(){
+  const vid=$("cam");let times=[],t0=performance.now(),useRVFC="requestVideoFrameCallback" in HTMLVideoElement.prototype;
+  R.camera.rvfc=useRVFC;
+  const onFrame=(now,meta)=>{
+    if(!stream)return;
+    times.push(meta&&meta.mediaTime!=null?meta.mediaTime*1000:now);
+    if(times.length>90)times.shift();
+    if(performance.now()-t0>1000&&times.length>10){
+      const span=times[times.length-1]-times[0];
+      R.camera.measuredFps=(times.length-1)/(span/1000);t0=performance.now();showCamTable();
+      $("hud").innerHTML=`${vid.videoWidth}×${vid.videoHeight}<br>実測 ${R.camera.measuredFps.toFixed(1)} fps${track&&track.getSettings().zoom!=null?"<br>ズーム "+track.getSettings().zoom.toFixed(2)+"×":""}`;
+    }
+    motion(vid);
+    useRVFC?vid.requestVideoFrameCallback(onFrame):requestAnimationFrame(t=>onFrame(t,null));
+  };
+  useRVFC?vid.requestVideoFrameCallback(onFrame):requestAnimationFrame(t=>onFrame(t,null));
+}
+function motion(vid){
+  if(!vid.videoWidth)return;
+  const W=96,H=Math.round(W*vid.videoHeight/vid.videoWidth);
+  if(off.width!==W||off.height!==H){off.width=W;off.height=H;dc.width=W;dc.height=H;prev=null;}
+  octx.drawImage(vid,0,0,W,H);
+  const cur=octx.getImageData(0,0,W,H);
+  let n=0;
+  if(prev){
+    const out=showDiff?dctx.createImageData(W,H):null;
+    for(let i=0;i<cur.data.length;i+=4){
+      const d=Math.abs(cur.data[i]-prev.data[i])+Math.abs(cur.data[i+1]-prev.data[i+1])+Math.abs(cur.data[i+2]-prev.data[i+2]);
+      if(d>60){n++;if(out){out.data[i]=255;out.data[i+1]=40;out.data[i+2]=40;out.data[i+3]=255;}}
+    }
+    if(out)dctx.putImageData(out,0,0);else dctx.clearRect(0,0,W,H);
+  }
+  prev=cur;
+  const pct=n/(W*H)*100,el=$("motion");
+  el.textContent=`動き ${pct.toFixed(1)}%`;
+  if(pct>3){lastMotion=performance.now();}
+  el.classList.toggle("hit",performance.now()-lastMotion<400);
+}
+$("btnStart").onclick=startCam;
+$("btnStop").onclick=stopCam;
+$("btnOrient").onclick=()=>{landscape=!landscape;$("stage").classList.toggle("land",landscape);};
+$("btnGuide").onclick=()=>{const g=$("guide");g.style.display=g.style.display==="none"?"":"none";};
+$("btnDiff").onclick=()=>{showDiff=!showDiff;};
+$("btnGyro").onclick=async()=>{
+  try{
+    if(typeof DeviceOrientationEvent!=="undefined"&&DeviceOrientationEvent.requestPermission){
+      const r=await DeviceOrientationEvent.requestPermission();if(r!=="granted"){R.camera.tilt="拒否";showCamTable();return;}
+    }
+    window.addEventListener("deviceorientation",e=>{
+      R.camera.tilt=`前後 ${e.beta!=null?e.beta.toFixed(1):"?"}° / 左右 ${e.gamma!=null?e.gamma.toFixed(1):"?"}°`;
+    });
+    setInterval(()=>{if(R.camera.tilt)showCamTable();},1000);
+  }catch(err){R.camera.tilt="エラー: "+err.message;showCamTable();}
+};
+
+/* ---------- ②③ file analysis ---------- */
+$("fCap").onchange=e=>analyzeFile(e.target.files[0],"撮影画面");
+$("fLib").onchange=e=>analyzeFile(e.target.files[0],"ライブラリ");
+
+async function analyzeFile(f,src){
+  if(!f)return;
+  const info={"取得方法":src,"ファイル名":f.name,"種類":f.type||"?","サイズ":(f.size/1048576).toFixed(1)+" MB"};
+  table($("fileTbl"),Object.assign({},info,{"解析":"中…"}));
+  // container parse
+  let meta={},tracks=[];
+  try{
+    const buf=await f.arrayBuffer();
+    const r=parseMov(new DataView(buf));meta=r.meta;tracks=r.tracks;
+  }catch(err){info["解析エラー"]=err.message;}
+  const vt=tracks.find(t=>t.handler==="vide");
+  if(vt){
+    info["映像形式"]=vt.codec||"?";
+    info["解像度"]=vt.w&&vt.h?`${vt.w}×${vt.h}`:"?";
+    info["コマ数"]=vt.frames;
+    info["長さ"]=vt.duration.toFixed(2)+" 秒";
+    info["平均fps"]=`<b>${(vt.frames/vt.duration).toFixed(1)}</b>`;
+    info["fps内訳"]=vt.rates.map(r=>`${r.fps.toFixed(1)}fps×${r.count}コマ`).join(" / ");
+  }
+  const pick=k=>Object.keys(meta).find(x=>x.toLowerCase().includes(k));
+  const kf=pick("focal_length"),kl=pick("lens_model"),km=Object.keys(meta).find(x=>x==="com.apple.quicktime.model");
+  info["焦点距離(35mm換算)"]=kf?`<b class="ok">${meta[kf]}</b>`:'<span class="ng">記録なし</span>';
+  info["レンズ"]=kl?meta[kl]:"記録なし";
+  info["機種"]=km?meta[km]:"—";
+  info["スロー情報"]=Object.keys(meta).filter(k=>/rate|slow|playback/i.test(k)).map(k=>k.replace("com.apple.quicktime.","")+"="+meta[k]).join(" / ")||"—";
+  delete info["解析"];
+  table($("fileTbl"),info);
+  $("metaPre").textContent=Object.entries(meta).map(([k,v])=>`${k} = ${v}`).join("\n")||"（メタデータなし）";
+  R.file[src]=Object.fromEntries(Object.entries(info).map(([k,v])=>[k,String(v).replace(/<[^>]+>/g,"")]));
+  R.file[src].meta=meta;
+  updReport();
+  const fv=$("fvid");fv.style.display="";fv.src=URL.createObjectURL(f);
+}
+
+/* Minimal QuickTime/MP4 box parser: tracks (fps via stts) and Apple metadata (keys/ilst) */
+function parseMov(dv){
+  const meta={},tracks=[];
+  const str=(o,n)=>{let s="";for(let i=0;i<n;i++)s+=String.fromCharCode(dv.getUint8(o+i));return s;};
+  const CONT=new Set(["moov","trak","mdia","minf","stbl","udta","edts","dinf"]);
+  let keys=[];
+  function walk(start,end,ctx){
+    let p=start;
+    while(p+8<=end){
+      let size=dv.getUint32(p),type=str(p+4,4),hdr=8;
+      if(size===1){size=Number(dv.getBigUint64(p+8));hdr=16;}else if(size===0)size=end-p;
+      if(size<hdr||p+size>end)break;
+      const b=p+hdr,e=p+size;
+      if(CONT.has(type)){
+        if(type==="trak"){const t={rates:[],frames:0,duration:0};tracks.push(t);walk(b,e,t);}
+        else walk(b,e,ctx);
+      }else if(type==="meta"){
+        // QuickTime meta has no fullbox header; ISO meta does
+        const t2=str(b+4,4);walk(t2==="hdlr"||t2==="keys"||t2==="ilst"?b:b+4,e,ctx);
+      }else if(type==="keys"){
+        const n=dv.getUint32(b+4);let q=b+8;keys=[];
+        for(let i=0;i<n&&q<e;i++){const ks=dv.getUint32(q);keys.push(str(q+8,ks-8));q+=ks;}
+      }else if(type==="ilst"){
+        let q=b;
+        while(q+8<=e){
+          const is=dv.getUint32(q),idx=dv.getUint32(q+4);
+          let r=q+8;
+          while(r+16<=q+is){
+            const ds=dv.getUint32(r);
+            if(str(r+4,4)==="data"){
+              const dt=dv.getUint32(r+8)&0xffffff,vo=r+16,vl=ds-16;
+              let val;
+              if(dt===1)val=new TextDecoder().decode(new Uint8Array(dv.buffer,vo,vl));
+              else if(dt===23&&vl===4)val=dv.getFloat32(vo);
+              else if(dt===24&&vl===8)val=dv.getFloat64(vo);
+              else if((dt===21||dt===22)&&vl<=8){val=0;for(let k=0;k<vl;k++)val=val*256+dv.getUint8(vo+k);}
+              else val="(type"+dt+", "+vl+"B)";
+              const name=keys[idx-1]||("idx"+idx);
+              meta[name]=typeof val==="number"?+val.toFixed(4):val;
+            }
+            if(ds<8)break;r+=ds;
+          }
+          if(is<8)break;q+=is;
+        }
+      }else if(ctx&&type==="hdlr"){const h=str(b+8,4);if(!ctx.handler&&["vide","soun"].includes(h))ctx.handler=h;}
+      else if(ctx&&type==="mdhd"){const v=dv.getUint8(b);ctx.timescale=v===1?dv.getUint32(b+20):dv.getUint32(b+12);ctx.duration=(v===1?Number(dv.getBigUint64(b+24)):dv.getUint32(b+16))/ctx.timescale;}
+      else if(ctx&&type==="tkhd"){const v=dv.getUint8(b),o=v===1?b+84+4:b+72+4;ctx.w=dv.getUint32(o)/65536;ctx.h=dv.getUint32(o+4)/65536;}
+      else if(ctx&&type==="stsd"){ctx.codec=str(b+12,4);}
+      else if(ctx&&type==="stts"){
+        const n=dv.getUint32(b+4);const m=new Map();
+        for(let i=0;i<n;i++){const c=dv.getUint32(b+8+i*8),d=dv.getUint32(b+12+i*8);m.set(d,(m.get(d)||0)+c);ctx.frames+=c;}
+        ctx._stts=m;
+      }
+      p+=size;
+    }
+  }
+  walk(0,dv.byteLength,null);
+  tracks.forEach(t=>{if(t._stts&&t.timescale)t.rates=[...t._stts].map(([d,c])=>({fps:t.timescale/d,count:c})).sort((a,b)=>b.count-a.count).slice(0,4);delete t._stts;});
+  return{meta,tracks};
+}
+
+/* ---------- report ---------- */
+$("btnCopy").onclick=async()=>{
+  updReport();
+  const txt="【ショット解析 カメラ確認結果】\n"+$("report").textContent;
+  try{await navigator.clipboard.writeText(txt);$("btnCopy").textContent="コピーしました";}
+  catch(e){const r=document.createRange();r.selectNodeContents($("report"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("btnCopy").textContent="選択しました→コピーしてください";}
+  setTimeout(()=>$("btnCopy").textContent="結果をコピー",2500);
+};
+updReport();
+</script>
+</body>
+</html>
