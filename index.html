@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" id="vp">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#07090a">
@@ -20,7 +20,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans",sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+html,body{touch-action:manipulation;margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans",sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
 body{min-height:100dvh;background:radial-gradient(120% 60% at 50% -10%,#16241a 0%,var(--bg) 55%) fixed}
 .num{font-family:"SF Pro Display",-apple-system,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
@@ -132,6 +132,10 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 .gbtn.on{color:var(--acc);border-color:rgba(182,243,106,.5);background:rgba(182,243,106,.14)}
 .glass{background:var(--glass);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border:1px solid var(--line)}
 
+/* Blurring what sits behind a panel is recomputed for every video frame, so full-screen panels use a solid tint. */
+.screen .glass,.screen .gbtn,.screen .busy{-webkit-backdrop-filter:none;backdrop-filter:none}
+.screen .glass,.screen .gbtn{background:rgba(14,18,20,.84)}
+
 /* setup */
 .setupdock{position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:5;border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .hint{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
@@ -218,7 +222,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">v1.1.1</div>
+  <div class="ver">v1.1.2</div>
 </header>
 
 <main>
@@ -354,7 +358,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
       <input type="range" id="sFrame" min="0" max="0" value="0">
       <button id="sNext" aria-label="次のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l10-7z"/></svg></button>
     </div>
-    <div class="hint" id="h2"><i>2</i>線の両端を、遠くの地面の端に合わせる<small id="h2s">傾きの補正</small></div>
+    <div class="hint" id="h2"><i>2</i>線を動かして、遠くの地面の端に合わせる<small id="h2s">傾きの補正</small></div>
     <div class="chips" id="clubs"></div>
     <button class="optsum" id="optSum"><span id="optTxt"></span><i>›</i></button>
     <div class="opts" id="opts" hidden>
@@ -430,7 +434,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="1.1.1";
+const APP_VERSION="1.1.2";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -440,6 +444,22 @@ function tiles(el,items){
   el.innerHTML=items.map(t=>`<div class="tile${t.wide?" wide":""}"><div class="k"><span class="dot ${t.st||""}"></span>${t.k}</div><div class="v num ${t.st||""}">${t.v}</div>${t.s?`<div class="s">${t.s}</div>`:""}</div>`).join("");
 }
 function updReport(){$("report").textContent=JSON.stringify(R,null,1);}
+
+/* ---------- no page zoom: the screens are laid out for a fixed scale ---------- */
+for(const t of["gesturestart","gesturechange"])document.addEventListener(t,e=>e.preventDefault());
+document.addEventListener("dblclick",e=>e.preventDefault());
+let lastTouch=0;
+document.addEventListener("touchend",e=>{
+  const now=e.timeStamp,quick=now-lastTouch<320;lastTouch=now;
+  // Buttons keep rapid taps for frame stepping; touch-action already stops them zooming.
+  if(quick&&!e.target.closest("button,input,label,select,summary"))e.preventDefault();
+},{passive:false});
+if(window.visualViewport)visualViewport.addEventListener("resize",()=>{
+  if(visualViewport.scale>1.01){
+    const m=$("vp"),c=m.content;m.content=c.replace("maximum-scale=1","maximum-scale=1.01");
+    requestAnimationFrame(()=>{m.content=c;});
+  }
+});
 
 /* ---------- tabs & segments ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
@@ -783,18 +803,30 @@ class Frames{
     }
   }
   /* Frames around the one asked for stay ready, so stepping does not decode from the keyframe every time. */
-  async show(i,draw){
+  async show(i,draw,sig={}){
     if(!this.mem)this.mem=new Map();
     const hit=this.mem.get(i);
     if(hit){this.mem.delete(i);this.mem.set(i,hit);draw(hit);return;}
-    if(this.mode==="seek"){await this.iterate(i,i,async f=>draw(f));return;}
-    await this.iterate(Math.max(0,i-5),Math.min(this.n-1,i+5),async(f,j)=>{
+    if(this.mode==="seek"){await this.iterate(i,i,async f=>draw(f),sig);return;}
+    await this.iterate(Math.max(0,i-2),Math.min(this.n-1,i+6),async(f,j)=>{
       if(j===i)draw(f);
-      if(!this.mem.has(j))this.mem.set(j,await createImageBitmap(f));
-    });
+      if(!sig.stop&&!this.mem.has(j))this.mem.set(j,await createImageBitmap(f));
+    },sig);
     while(this.mem.size>24){const k=this.mem.keys().next().value;this.mem.get(k).close();this.mem.delete(k);}
   }
   drop(){if(this.mem){this.mem.forEach(b=>b.close());this.mem.clear();}}
+  /* Nearest frame that decodes on its own: instant, so it is what a drag shows until the finger lifts. */
+  keyNear(i){
+    if(this.mode==="seek")return i;
+    if(!this.keyPres){
+      const back=new Map(this.pres.map((d,p)=>[d,p]));
+      this.keyPres=this.s.map((q,d)=>q.key?back.get(d):-1).filter(p=>p>=0).sort((a,b)=>a-b);
+    }
+    let best=this.keyPres[0];
+    for(const k of this.keyPres){if(k<=i)best=k;else break;}
+    return best;
+  }
+  async keyOnly(i,draw,sig){await this.iterate(i,i,async f=>draw(f),sig);}
   async bytes(d){
     const s=this.s[d];
     if(!this.cache||s.off<this.cache.a||s.off+s.size>this.cache.b){
@@ -1181,7 +1213,7 @@ function toVideo(cv,ev,m){
 
 /* ---------- setup screen ---------- */
 let S=null;
-const sb=$("sBase"),so=$("sOver"),sbx=sb.getContext("2d",{willReadFrequently:true}),sox=so.getContext("2d");
+const sb=$("sBase"),so=$("sOver"),sbx=sb.getContext("2d"),sox=so.getContext("2d");
 async function loadMovie(f,src){
   const{meta,tracks}=await readMoov(f);
   if(src)showFileInfo(f,src,meta,tracks,null);
@@ -1200,7 +1232,7 @@ async function openFile(f,src){
   try{
     const{m,mm,avg}=await loadMovie(f,src),{W,H,frames}=m;
     S={m,frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
-      hz:[{x:W*.08,y:H*.42},{x:W*.92,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:avg>=200?240:120,fpsFromFile:avg>=100,mm:mm||26,mmFromFile:!!mm};
+      hz:[{x:W*.22,y:H*.42},{x:W*.78,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:avg>=200?240:120,fpsFromFile:avg>=100,mm:mm||26,mmFromFile:!!mm};
     sb.width=so.width=W;sb.height=so.height=H;
     R.decoder=frames.mode;
     $("sFrame").max=frames.n-1;$("sFrame").value=0;
@@ -1216,15 +1248,18 @@ async function openFile(f,src){
     toast("読み込めませんでした："+e.message);
   }
 }
-let sfBusy=false,sfWant=-1;
-async function seekSetup(i){
-  sfWant=i;if(sfBusy)return;
+let sfBusy=false,sfWant=-1,sfSig=null,sfQuick=false;
+async function seekSetup(i,quick){
+  sfWant=i;sfQuick=!!quick;
+  if(sfSig)sfSig.stop=true;
+  if(sfBusy)return;
   sfBusy=true;
   try{
     while(sfWant>=0){
-      const j=sfWant;sfWant=-1;
-      await S.m.frames.show(j,f=>drawFrame(sbx,f,S.m));
-      S.frame=j;
+      const j=sfWant,q=sfQuick,sig={};sfWant=-1;sfSig=sig;
+      const fr=S.m.frames,draw=f=>{drawFrame(sbx,f,S.m);S.frame=j;};
+      if(q)await fr.keyOnly(j,draw,sig);else await fr.show(j,draw,sig);
+      sfSig=null;
     }
   }finally{sfBusy=false;}
 }
@@ -1236,7 +1271,7 @@ function drawSetup(){
   g.setLineDash([10*u,8*u]);g.lineWidth=2.2*u;g.strokeStyle=S.hzSet?"#b6f36a":"rgba(255,255,255,.8)";
   g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();g.setLineDash([]);
   for(const p of S.hz){
-    g.beginPath();g.arc(p.x,p.y,11*u,0,7);g.fillStyle=S.hzSet?"#b6f36a":"#fff";g.fill();
+    g.beginPath();g.arc(p.x,p.y,15*u,0,7);g.fillStyle=S.hzSet?"#b6f36a":"#fff";g.fill();
     g.lineWidth=3*u;g.strokeStyle="rgba(0,0,0,.45)";g.stroke();
   }
   if(S.tee){
@@ -1296,12 +1331,16 @@ function loupeAt(ev,p){
 }
 let sDrag=null;
 function moveHorizon(p){
+  if(sDrag.line){const d=p.y-sDrag.y;S.hz[0].y=sDrag.ya+d;S.hz[1].y=sDrag.yb+d;return;}
   S.hz[sDrag.hz]={x:p.x,y:p.y};
   if(sDrag.both)S.hz[1-sDrag.hz].y=p.y;
 }
 function setTee(p){
   const{W,H}=S.m,k=Math.max(W,H)/1920,reach=Math.round(k*22),rMax=Math.round(k*34),rad=reach+rMax+6,x0=Math.max(0,Math.round(p.x)-rad),y0=Math.max(0,Math.round(p.y)-rad);
-  const w=Math.min(W-x0,rad*2+1),h=Math.min(H-y0,rad*2+1),d=sbx.getImageData(x0,y0,w,h).data;
+  const w=Math.min(W-x0,rad*2+1),h=Math.min(H-y0,rad*2+1),tc=document.createElement("canvas");
+  tc.width=w;tc.height=h;
+  const tx=tc.getContext("2d",{willReadFrequently:true});tx.drawImage(sb,-x0,-y0);
+  const d=tx.getImageData(0,0,w,h).data;
   const r=fitBallCircle(d,w,h,Math.round(p.x)-x0,Math.round(p.y)-y0,reach,Math.max(3,Math.round(k*4)),rMax);
   if(r){S.tee={x:r.x+x0,y:r.y+y0};if(!S.dManual)S.d=r.d;}else S.tee={x:p.x,y:p.y};
   S.teeFrame=S.frame;renderOpts();drawSetup();
@@ -1310,11 +1349,18 @@ so.onpointerdown=ev=>{
   if(!S)return;
   so.setPointerCapture(ev.pointerId);
   const p=toVideo(so,ev,S.m);
-  const reach=44/p.s;
+  const reach=48/p.s;
   let hit=-1;
   S.hz.forEach((q,i)=>{if(Math.hypot(q.x-p.x,q.y-p.y)<reach)hit=i;});
   // Until the line has been placed, dragging either end moves the whole line, so one drag already gets it close.
   sDrag=hit>=0?{hz:hit,both:!S.hzSet}:{tee:true};
+  if(sDrag.tee){
+    // Touching the line itself moves it, unless the finger is on the ball.
+    const[a,b]=S.hz,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,u=((p.x-a.x)*dx+(p.y-a.y)*dy)/(len*len);
+    const off=Math.abs((p.x-a.x)*dy-(p.y-a.y)*dx)/len,onLine=u>-.25&&u<1.25&&off<30/p.s;
+    const onBall=S.tee&&Math.hypot(S.tee.x-p.x,S.tee.y-p.y)<30/p.s;
+    if(onLine&&!onBall)sDrag={line:true,y:p.y,ya:a.y,yb:b.y};
+  }
   if(sDrag.tee)S.tee={x:p.x,y:p.y};else{moveHorizon(p);S.hzSet=true;}
   drawSetup();loupeAt(ev,p);
 };
@@ -1329,7 +1375,8 @@ so.onpointerup=so.onpointercancel=ev=>{
   if(sDrag.tee)setTee(toVideo(so,ev,S.m));
   sDrag=null;$("loupe").hidden=true;
 };
-$("sFrame").oninput=e=>{seekSetup(+e.target.value).then(drawSetup);};
+$("sFrame").oninput=e=>{seekSetup(S.m.frames.keyNear(+e.target.value),true).then(drawSetup);};
+$("sFrame").onchange=e=>{seekSetup(+e.target.value).then(drawSetup);};
 const stepSetup=d=>{const i=Math.max(0,Math.min(S.m.frames.n-1,+$("sFrame").value+d));$("sFrame").value=i;seekSetup(i).then(drawSetup);};
 $("sPrev").onclick=()=>stepSetup(-1);
 $("sNext").onclick=()=>stepSetup(1);
@@ -1592,7 +1639,7 @@ function openReview(x){
   $("review").hidden=false;$("sheet").classList.remove("open");$("speeds").hidden=true;
   P.fix=false;$("fixbar").hidden=true;$("rFix").classList.remove("on");
   layoutShot();updatePanel(x.fresh);
-  P.clk=0;P.playing=true;P.idx=P.a;
+  P.clk=0;P.playing=true;P.idx=P.a;P.overKey=null;
   drawMiniBase();
   startPump(P.a);
   cancelAnimationFrame(P.raf);P.last=performance.now();P.raf=requestAnimationFrame(tick);
@@ -1656,15 +1703,18 @@ function startPump(from){
     if(P.clk-due<1.5/fps||i===P.b){drawFrame(rbx,f,s.m);P.idx=i;}
   },sig).catch(e=>{if(!sig.stop)toast("再生エラー："+e.message);});
 }
-function requestShow(i){
-  P.seekWant=i;if(P.seekBusy)return;
+function requestShow(i,quick){
+  P.seekWant=i;P.seekQuick=!!quick;
+  if(P.seekSig)P.seekSig.stop=true;
+  if(P.seekBusy)return;
   P.seekBusy=true;
   (async()=>{
     try{
       while(P.seekWant>=0){
-        const j=P.seekWant;P.seekWant=-1;
-        await P.shot.S.m.frames.show(j,f=>drawFrame(rbx,f,P.shot.S.m));
-        P.idx=j;
+        const j=P.seekWant,q=P.seekQuick,sig={},fr=P.shot.S.m.frames,draw=f=>drawFrame(rbx,f,P.shot.S.m);
+        P.seekWant=-1;P.seekSig=sig;
+        if(q)await fr.keyOnly(j,draw,sig);else{await fr.show(j,draw,sig);if(!sig.stop)P.idx=j;}
+        P.seekSig=null;
       }
     }catch(e){toast("表示エラー："+e.message);}
     P.seekBusy=false;
@@ -1686,14 +1736,14 @@ function drawTracer(g,line,T,W,H){
     const d=Math.hypot(line[i].u-line[i-1].u,line[i].v-line[i-1].v);len+=d;line[i].a=len;
     if(len-pts[pts.length-1].a>=step||i===n-1)pts.push(line[i]);
   }
-  g.save();g.lineJoin="round";g.shadowColor="rgba(255,59,59,.5)";g.shadowBlur=7*u;
+  g.save();g.lineJoin="round";
   for(let i=1;i<pts.length;i++){
     const f=pts[i].a/len,fade=Math.min(1,f/.3),last=i===pts.length-1;
     g.lineCap=fade<1?"butt":"round";
     g.lineWidth=root+(tip-root)*Math.pow(f,.7);
     g.strokeStyle=`rgba(255,${Math.round(59+90*(1-fade))},59,${.2+.8*fade})`;
     g.beginPath();g.moveTo(pts[i-1].u,pts[i-1].v);g.lineTo(pts[i].u,pts[i].v);g.stroke();
-    if(last){g.lineCap="round";g.fillStyle="#fff";g.shadowColor="#ff3b3b";g.shadowBlur=12*u;g.beginPath();g.arc(pts[i].u,pts[i].v,tip*.75,0,7);g.fill();}
+    if(last){g.fillStyle="rgba(255,59,59,.35)";g.beginPath();g.arc(pts[i].u,pts[i].v,tip*2.2,0,7);g.fill();g.fillStyle="#fff";g.beginPath();g.arc(pts[i].u,pts[i].v,tip*.75,0,7);g.fill();}
   }
   g.restore();
 }
@@ -1728,8 +1778,8 @@ function tick(now){
     if(!P.drag)$("rScrub").value=Math.min(1000,P.clk/P.total*1000);
   }
   const r=x.res,T=r?tracerTime(Math.max(0,P.clk-P.tImpact),r):0;
-  drawOver(P.clk>P.tImpact?T:0);
-  drawMini(P.clk>P.tImpact?T:0);
+  const T2=P.clk>P.tImpact?T:0,key=`${T2.toFixed(3)}|${P.fix}|${P.idx}|${r?r.pts.length:0}|${$("mini").clientWidth}`;
+  if(key!==P.overKey){P.overKey=key;drawOver(T2);drawMini(T2);}
 }
 function setPlaying(on,flash){
   if(on===P.playing)return;
@@ -1755,10 +1805,11 @@ $("rScrub").oninput=e=>{
   const s=P.shot.S;
   if(!P.drag){P.drag=true;P.wasPlaying=P.playing;setPlaying(false);$("review").classList.add("scrubbing");e.target.classList.add("drag");}
   P.clk=e.target.value/1000*P.total;
-  const i=Math.min(P.b,P.a+Math.floor(P.clk*s.fps));P.idx=i;requestShow(i);
+  const i=Math.min(P.b,P.a+Math.floor(P.clk*s.fps));P.idx=i;requestShow(Math.max(P.a,s.m.frames.keyNear(i)),true);
 };
 $("rScrub").onchange=e=>{
   P.drag=false;$("review").classList.remove("scrubbing");e.target.classList.remove("drag");
+  requestShow(P.idx);
   if(P.wasPlaying)setPlaying(true);
 };
 ro.onclick=ev=>{
@@ -1862,7 +1913,7 @@ function drawMini(T){
     prev=p;
   }
   if(prev){
-    g.save();g.shadowColor="#ff3b3b";g.shadowBlur=10*dpr;g.fillStyle="#fff";g.beginPath();g.arc(prev.u,prev.v,2.2*dpr,0,7);g.fill();g.restore();
+    g.fillStyle="rgba(255,59,59,.4)";g.beginPath();g.arc(prev.u,prev.v,5*dpr,0,7);g.fill();g.fillStyle="#fff";g.beginPath();g.arc(prev.u,prev.v,2.2*dpr,0,7);g.fill();
   }
 }
 
