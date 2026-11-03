@@ -112,6 +112,96 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:30;display:flex;gap:4px;background:rgba(20,26,28,.78);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--line);border-radius:99px;padding:6px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .tab{border:0;background:none;color:var(--sub);font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;width:78px;white-space:nowrap;border-radius:99px}
 .tab.on{background:rgba(255,255,255,.1);color:var(--acc)}
+
+/* analysis home */
+.hero{background:linear-gradient(160deg,rgba(182,243,106,.12),rgba(91,227,166,.03) 60%,transparent);border:1px solid var(--line);border-radius:24px;padding:20px 18px;margin:8px 0 12px}
+.hero h2{font-size:25px;margin:2px 0 6px}
+.shots{display:flex;flex-direction:column;gap:8px}
+.shot{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;width:100%;text-align:left;color:inherit;font:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.shot .club{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:800;background:rgba(182,243,106,.12);color:var(--acc)}
+.shot b{font-size:18px}.shot small{color:var(--sub);font-size:12px;margin-left:2px}
+.shot .chev{color:var(--dim);font-size:20px}
+
+/* full-screen screens */
+.screen{position:fixed;inset:0;z-index:50;background:#000;overflow:hidden;touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;animation:fade .2s ease}
+.screen canvas.fill{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.topbar{position:absolute;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 6px) 12px 18px;background:linear-gradient(rgba(0,0,0,.6),transparent)}
+.topbar .ttl{flex:1;text-align:center;font-weight:700;font-size:16px;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.gbtn{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--fg);display:grid;place-items:center;padding:0;font:inherit;font-size:12px;font-weight:700;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.gbtn svg{width:21px;height:21px}
+.gbtn.on{color:var(--acc);border-color:rgba(182,243,106,.5);background:rgba(182,243,106,.14)}
+.glass{background:var(--glass);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border:1px solid var(--line)}
+
+/* setup */
+.setupdock{position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:5;border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.hint{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+.hint i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;background:var(--card2);color:var(--sub)}
+.hint.done i{background:var(--acc);color:var(--accInk)}
+.hint small{margin-left:auto;color:var(--sub);font-weight:500;font-size:12px;white-space:nowrap}
+.scrub{display:flex;align-items:center;gap:8px}
+.scrub button{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:var(--card2);color:var(--fg);display:grid;place-items:center;padding:0}
+.scrub svg{width:18px;height:18px}
+.scrub input{min-width:0}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;min-width:44px;padding:7px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--sub);font:inherit;font-size:13px;font-weight:700}
+.chips button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--accInk);border-color:transparent}
+.optsum{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;color:var(--sub);font:inherit;font-size:12.5px;padding:2px 4px}
+.optsum b{color:var(--fg);font-weight:600}.optsum .warn{color:var(--warn)}
+.optsum i{font-style:normal;font-size:18px;line-height:1;transition:transform .2s}
+.optsum.open i{transform:rotate(90deg)}
+.opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 8px;min-width:0}
+.opt label{display:block;font-size:10.5px;color:var(--sub)}
+.opt .row{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.opt b{font-size:15px;white-space:nowrap}.opt b small{font-size:10.5px;color:var(--sub);font-weight:500;margin-left:2px}
+.opt button{border:0;background:var(--card2);color:var(--fg);width:24px;height:24px;border-radius:7px;font:inherit;font-weight:700;padding:0;flex:none}
+.opt.warn{border-color:rgba(255,193,94,.5)}
+.loupe{position:absolute;z-index:6;width:128px;height:128px;border-radius:50%;box-shadow:0 0 0 2px var(--acc),0 10px 30px rgba(0,0,0,.6);pointer-events:none}
+
+/* busy */
+.busy{position:absolute;inset:0;z-index:9;display:grid;place-content:center;justify-items:center;gap:14px;background:rgba(7,9,10,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:center;padding:30px}
+.busy b{font-size:17px}.busy small{color:var(--sub);font-size:12.5px;line-height:1.6}
+.pbar{width:220px;height:5px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden}
+.pbar span{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .15s linear}
+
+/* review */
+.panel{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 56px);z-index:6;border-radius:20px;padding:10px 6px;display:grid;grid-template-columns:.7fr 1.1fr 1.2fr 1fr;text-align:center;transform-origin:50% 0;transition:transform .42s cubic-bezier(.2,.8,.2,1),background .42s}
+.panel .k{font-size:11px;color:rgba(243,246,244,.72);white-space:nowrap}
+.panel .v{font-size:25px;font-weight:700;margin-top:3px;white-space:nowrap;transition:color .42s}
+.panel .v small{font-size:11px;font-weight:500;color:rgba(243,246,244,.72);margin-left:2px}
+.panel.big{transform:translateY(16dvh) scale(1.03);background:rgba(10,16,12,.8)}
+.panel.big .v:not(.cl){color:var(--acc)}
+.conf{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 146px);z-index:5;padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:600;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.roundeq{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 178px);z-index:5;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;color:var(--sub)}
+.roundeq b{color:var(--acc);font-size:16px;font-weight:700;margin-left:2px}
+.scrubbing .roundeq{opacity:0}
+.rail{position:absolute;right:10px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:6;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.speeds{display:flex;gap:2px;padding:4px;border-radius:99px;position:absolute;right:50px;top:50%;transform:translateY(-50%)}
+.speeds button{border:0;background:none;color:var(--sub);font:inherit;font-size:12.5px;font-weight:700;padding:7px 10px;border-radius:99px}
+.speeds button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--accInk)}
+.mini{position:absolute;left:10px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:5;width:46vw;max-width:230px;height:30vw;max-height:150px;border-radius:18px;overflow:hidden;box-shadow:0 0 0 2px rgba(91,227,166,.38),0 10px 30px rgba(0,0,0,.5);transition:width .28s ease,height .28s ease,max-width .28s,max-height .28s}
+.mini.large{width:calc(100vw - 72px);max-width:none;height:56vw;max-height:none}
+.mini canvas{width:100%;height:100%;display:block}
+.mini button{position:absolute;right:6px;top:6px;width:30px;height:30px;border:0;background:none;color:#fff;padding:0;display:grid;place-items:center}
+.mini svg{width:16px;height:16px}
+.transport{position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:6;display:flex;align-items:center;gap:6px;border-radius:99px;padding:6px 14px 6px 6px}
+.transport button{flex:none;width:42px;height:42px;border:0;background:none;color:var(--fg);display:grid;place-items:center;padding:0}
+.transport svg{width:21px;height:21px}
+.transport input{min-width:0;margin-left:6px}
+.transport input.drag::-webkit-slider-thumb{width:30px;height:30px}
+.panel,.conf{transition-property:transform,background,opacity}
+.scrubbing .panel,.scrubbing .conf{opacity:0}
+.flash{position:absolute;left:50%;top:50%;z-index:6;width:68px;height:68px;margin:-34px;border-radius:50%;display:grid;place-items:center;pointer-events:none;opacity:0}
+.flash.show{animation:flash .55s ease}
+.flash svg{width:30px;height:30px}
+@keyframes flash{0%{opacity:0;transform:scale(.8)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1)}}
+.fixbar{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 146px);z-index:7;padding:8px 14px;border-radius:99px;font-size:12.5px;font-weight:600;white-space:nowrap;color:var(--acc)}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:12;max-height:78dvh;overflow:auto;touch-action:pan-y;border-radius:26px 26px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom) + 18px);background:rgba(14,18,20,.92);transform:translateY(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet.open{transform:none}
+.sheet h3{margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.sheet p{color:var(--sub);font-size:12.5px;line-height:1.6;margin:10px 2px 12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 60px);z-index:99;max-width:88vw;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;background:rgba(40,16,16,.94);border:1px solid rgba(255,111,111,.5)}
 </style>
 </head>
 <body>
@@ -119,13 +209,13 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">カメラ確認 v0.7</div>
+  <div class="ver">v1.0</div>
 </header>
 
 <main>
 
 <!-- ================= LIVE ================= -->
-<section class="view on" id="v-live">
+<section class="view" id="v-live">
   <div class="stage" id="stage">
     <video id="cam" playsinline muted autoplay></video>
     <canvas id="diffc"></canvas>
@@ -179,10 +269,12 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 </section>
 
 <!-- ================= VIDEO ================= -->
-<section class="view" id="v-video">
-  <div class="eyebrow">動画から解析</div>
-  <h2>スロー動画を読み込む</h2>
-  <p class="lead">写真ライブラリのスローモーション（120fps）を選ぶと、実際のコマ数とズーム（焦点距離）をファイルから読み取ります。</p>
+<section class="view on" id="v-video">
+  <div class="hero">
+    <div class="eyebrow" style="margin-top:0">弾道解析</div>
+    <h2>スロー動画から測る</h2>
+    <p class="lead" style="margin-bottom:0">打席の真後ろから撮った120fps以上のスロー動画で、初速・打ち出し角・キャリーを計算します。すべてこのiPhoneの中で処理します。</p>
+  </div>
   <div class="bigbtns">
     <label class="bigbtn">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4v16M16 4v16M3 9h5M3 15h5M16 9h5M16 15h5"/></svg></div>
@@ -195,10 +287,14 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
       <input type="file" id="fCap" accept="video/*" capture="environment">
     </label>
   </div>
-  <video class="player" id="fvid" playsinline muted controls></video>
-  <div class="eyebrow" id="fileHead" hidden>ファイルの中身</div>
-  <div class="grid" id="fileTiles"></div>
-  <details id="metaBox" hidden><summary>撮影情報（メタデータ）の一覧</summary><pre id="metaPre">—</pre></details>
+  <div id="shotsWrap" hidden>
+    <div class="eyebrow">今回のショット</div>
+    <div class="shots" id="shots"></div>
+  </div>
+  <details id="fileBox" hidden><summary>最後に読み込んだファイルの情報</summary>
+    <div class="grid" id="fileTiles" style="margin-top:10px"></div>
+    <pre id="metaPre">—</pre>
+  </details>
 </section>
 
 <!-- ================= REPORT ================= -->
@@ -206,10 +302,8 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
   <div class="eyebrow">結果を送る</div>
   <h2>確認の手順</h2>
   <ol class="steps">
-    <li>「ライブ」で 60fps → 緑のボタン。実測fpsとズーム可否を見る</li>
-    <li>ズームのスライダーを動かす。続けて 120fps でも試す</li>
-    <li>「傾き」を押してセンサーを許可する</li>
-    <li>「動画」でスロー動画（IMG_5540）を選ぶ</li>
+    <li>「解析」でスロー動画を読み込み、測定まで進める</li>
+    <li>同じ球のSmartTrackの数値と見比べる</li>
     <li>下のボタンでコピーし、Claudeに貼り付ける</li>
   </ol>
   <button class="cta" id="btnCopy">結果をコピー</button>
@@ -218,16 +312,92 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 
 </main>
 
+<!-- ================= SETUP ================= -->
+<div class="screen" id="setup" hidden>
+  <canvas class="fill" id="sBase"></canvas>
+  <canvas class="fill" id="sOver"></canvas>
+  <canvas class="loupe" id="loupe" width="256" height="256" hidden></canvas>
+  <div class="topbar">
+    <button class="gbtn" id="sBack" aria-label="戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="ttl">測定の準備</div><div style="width:42px"></div>
+  </div>
+  <div class="setupdock glass" id="setupDock">
+    <div class="hint" id="h1"><i>1</i>インパクト前のコマで、ボールをタップ<small id="h1s"></small></div>
+    <div class="scrub">
+      <button id="sPrev" aria-label="前のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5v14L6 12z"/></svg></button>
+      <input type="range" id="sFrame" min="0" max="0" value="0">
+      <button id="sNext" aria-label="次のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l10-7z"/></svg></button>
+    </div>
+    <div class="hint" id="h2"><i>2</i>線の両端を動かして、地平線に合わせる<small id="h2s">傾きの補正</small></div>
+    <div class="chips" id="clubs"></div>
+    <button class="optsum" id="optSum"><span id="optTxt"></span><i>›</i></button>
+    <div class="opts" id="opts" hidden>
+      <div class="opt"><label>撮影fps</label><div class="row"><button data-d="fps-1">−</button><b class="num" id="oFps"></b><button data-d="fps+1">＋</button></div></div>
+      <div class="opt" id="oLensBox"><label>換算焦点距離</label><div class="row"><button data-d="mm-1">−</button><b class="num" id="oMm"></b><button data-d="mm+1">＋</button></div></div>
+      <div class="opt"><label>ボール直径</label><div class="row"><button data-d="d-1">−</button><b class="num" id="oD"></b><button data-d="d+1">＋</button></div></div>
+    </div>
+    <button class="cta" id="sGo" disabled>解析する</button>
+  </div>
+  <div class="busy" id="busy" hidden>
+    <b id="busyT">読み込み中</b>
+    <div class="pbar"><span id="busyP"></span></div>
+    <small id="busyS"></small>
+  </div>
+</div>
+
+<!-- ================= REVIEW ================= -->
+<div class="screen" id="review" hidden>
+  <canvas class="fill" id="rBase"></canvas>
+  <canvas class="fill" id="rOver"></canvas>
+  <div class="topbar">
+    <button class="gbtn" id="rBack" aria-label="戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="ttl" id="rTitle">ショット</div>
+    <button class="gbtn" id="rDel" aria-label="削除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg></button>
+  </div>
+  <div class="panel glass" id="panel">
+    <div><div class="k">クラブ</div><div class="v num cl" id="pClub">—</div></div>
+    <div><div class="k">キャリー</div><div class="v num"><span id="pCarry">—</span><small>yds</small></div></div>
+    <div><div class="k">ボール初速</div><div class="v num"><span id="pV">—</span><small>m/s</small></div></div>
+    <div><div class="k">打ち出し角</div><div class="v num"><span id="pLa">—</span><small>°</small></div></div>
+  </div>
+  <div class="conf glass" id="conf"><span class="dot" id="confDot"></span><span id="confT"></span></div>
+  <div class="roundeq glass" id="roundEq" hidden>ラウンド換算 <b class="num" id="roundYd"></b> yds</div>
+  <div class="fixbar glass" id="fixbar" hidden>ボールの位置をタップ（点をタップで削除）</div>
+  <div class="flash glass" id="flash"></div>
+  <div class="mini" id="mini"><canvas id="miniC"></canvas><button id="miniX" aria-label="拡大"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg></button></div>
+  <div class="rail">
+    <button class="gbtn on" id="rMini" aria-label="ミニマップ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3zM9 4v13M15 7v13"/></svg></button>
+    <button class="gbtn" id="rFix" aria-label="補正"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg></button>
+    <div style="position:relative">
+      <div class="speeds glass" id="speeds" hidden>
+        <button data-s="0.1">0.1x</button><button data-s="0.25" class="on">0.25x</button><button data-s="0.5">0.5x</button><button data-s="1">1.0x</button>
+      </div>
+      <button class="gbtn" id="rSpeed" aria-label="再生速度">0.25</button>
+    </div>
+    <button class="gbtn" id="rInfo" aria-label="詳細"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></button>
+  </div>
+  <div class="transport glass">
+    <button id="rPrev" aria-label="前のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+    <button id="rNext" aria-label="次のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    <input type="range" id="rScrub" min="0" max="1000" value="0">
+  </div>
+  <div class="sheet glass" id="sheet">
+    <h3>測定の詳細<button class="gbtn" id="sheetX" aria-label="閉じる" style="width:32px;height:32px">✕</button></h3>
+    <div class="grid" id="sheetTiles"></div>
+    <p id="sheetNote"></p>
+  </div>
+</div>
+
 <nav class="tabbar">
-  <button class="tab on" data-v="live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>ライブ</button>
-  <button class="tab" data-v="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2.5"/><path d="M16 10l5-3v10l-5-3"/></svg>動画</button>
+  <button class="tab on" data-v="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20C9 7 15 4 20 6"/><circle cx="20" cy="6" r="1.5" fill="currentColor"/><path d="M3 20h18"/></svg>解析</button>
+  <button class="tab" data-v="live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>カメラ確認</button>
   <button class="tab" data-v="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 4h8M9 4v2h6V4M6 6h12v15H6z"/><path d="M9 12h6M9 16h4"/></svg>結果</button>
 </nav>
 
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="0.7";
+const APP_VERSION="1.0";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -359,7 +529,8 @@ function motion(vid){
       const d=Math.abs(cur.data[i]-prev.data[i])+Math.abs(cur.data[i+1]-prev.data[i+1])+Math.abs(cur.data[i+2]-prev.data[i+2]);
       if(d>60){n++;if(out){out.data[i]=255;out.data[i+1]=59;out.data[i+2]=59;out.data[i+3]=255;}}
     }
-    if(out)dctx.putImageData(out,0,0);else dctx.clearRect(0,0,W,H);
+    // Camera movement changes most of the frame; hide that noise.
+    if(out&&n/(W*H)<.15)dctx.putImageData(out,0,0);else dctx.clearRect(0,0,W,H);
   }
   prev=cur;
   const pct=n/(W*H)*100,el=$("motion");
@@ -385,15 +556,25 @@ $("btnGyro").onclick=async e=>{
 };
 
 /* ---------- ②③ file analysis ---------- */
-$("fCap").onchange=e=>analyzeFile(e.target.files[0],"撮影画面");
-$("fLib").onchange=e=>analyzeFile(e.target.files[0],"ライブラリ");
+$("fCap").onchange=e=>{openFile(e.target.files[0],"撮影画面");e.target.value="";};
+$("fLib").onchange=e=>{openFile(e.target.files[0],"ライブラリ");e.target.value="";};
 
-async function analyzeFile(f,src){
-  if(!f)return;
-  $("fileHead").hidden=false;
-  tiles($("fileTiles"),[{k:"解析中",v:"…",wide:true,s:esc(f.name)}]);
-  let meta={},tracks=[],err=null;
-  try{const r=parseMov(new DataView(await f.arrayBuffer()));meta=r.meta;tracks=r.tracks;}catch(e){err=e.message;}
+/* Read only the moov box, so large files are not loaded into memory */
+async function readMoov(f){
+  let p=0;
+  while(p+8<=f.size){
+    const h=new DataView(await f.slice(p,p+16).arrayBuffer());
+    let s=h.getUint32(0);
+    const t=String.fromCharCode(h.getUint8(4),h.getUint8(5),h.getUint8(6),h.getUint8(7));
+    if(s===1)s=Number(h.getBigUint64(8));else if(s===0)s=f.size-p;
+    if(s<8)break;
+    if(t==="moov")return parseMov(new DataView(await f.slice(p,p+s).arrayBuffer()));
+    p+=s;
+  }
+  throw new Error("動画の情報（moov）が見つかりません");
+}
+
+function showFileInfo(f,src,meta,tracks,err){
   const vt=tracks.find(t=>t.handler==="vide");
   const pick=k=>Object.keys(meta).find(x=>x.toLowerCase().includes(k));
   const kf=pick("focal_length"),kl=pick("lens_model");
@@ -407,11 +588,10 @@ async function analyzeFile(f,src){
     {k:"ファイル",v:`<span style="font-size:14px">${esc(f.name)}</span>`,s:`${src} / ${(f.size/1048576).toFixed(1)}MB / ${esc(f.type||"?")}${err?" / 解析エラー:"+esc(err):""}`,wide:true},
   ];
   tiles($("fileTiles"),items);
-  $("metaBox").hidden=false;
+  $("fileBox").hidden=false;
   $("metaPre").textContent=Object.entries(meta).map(([k,v])=>`${k} = ${v}`).join("\n")||"（メタデータなし）";
-  R.file[src]={name:f.name,type:f.type,sizeMB:+(f.size/1048576).toFixed(1),video:vt?{w:vt.w,h:vt.h,frames:vt.frames,duration:+vt.duration.toFixed(3),avgFps:+fps.toFixed(2),rates:vt.rates,codec:vt.codec}:null,error:err,meta};
+  R.file[src]={name:f.name,type:f.type,sizeMB:+(f.size/1048576).toFixed(1),video:vt?{w:vt.w,h:vt.h,frames:vt.frames,duration:+vt.duration.toFixed(3),avgFps:+fps.toFixed(2),rates:vt.rates,codec:vt.codec,rot:vt.rot}:null,error:err,meta};
   updReport();
-  const fv=$("fvid");fv.style.display="block";fv.src=URL.createObjectURL(f);
 }
 
 /* Minimal QuickTime/MP4 box parser: tracks (fps via stts) and Apple metadata (keys/ilst) */
@@ -460,12 +640,50 @@ function parseMov(dv){
         }
       }else if(ctx&&type==="hdlr"){const h=str(b+8,4);if(!ctx.handler&&["vide","soun"].includes(h))ctx.handler=h;}
       else if(ctx&&type==="mdhd"){const v=dv.getUint8(b);ctx.timescale=v===1?dv.getUint32(b+20):dv.getUint32(b+12);ctx.duration=(v===1?Number(dv.getBigUint64(b+24)):dv.getUint32(b+16))/ctx.timescale;}
-      else if(ctx&&type==="tkhd"){const v=dv.getUint8(b),o=v===1?b+84+4:b+72+4;ctx.w=dv.getUint32(o)/65536;ctx.h=dv.getUint32(o+4)/65536;}
-      else if(ctx&&type==="stsd"){ctx.codec=str(b+12,4);}
+      else if(ctx&&type==="tkhd"){
+        const v=dv.getUint8(b),o=v===1?b+84+4:b+72+4,mx=v===1?b+52:b+40;
+        ctx.w=dv.getUint32(o)/65536;ctx.h=dv.getUint32(o+4)/65536;
+        ctx.rot=(Math.round(Math.atan2(dv.getInt32(mx+4),dv.getInt32(mx))*2/Math.PI)*90+360)%360;
+      }
+      else if(ctx&&type==="stsd"){
+        ctx.codec=str(b+12,4);
+        // Visual sample entry: 8-byte box header + 78 bytes of fields, then child boxes
+        const es=dv.getUint32(b+8),eb=b+8;
+        for(let q=eb+86;q+8<=eb+es;){
+          const cs=dv.getUint32(q),ct=str(q+4,4);
+          if(cs<8)break;
+          if(["avcC","hvcC","vpcC","av1C"].includes(ct)){ctx.descType=ct;ctx.desc=new Uint8Array(dv.buffer.slice(q+8,q+cs));}
+          q+=cs;
+        }
+      }
       else if(ctx&&type==="stts"){
-        const n=dv.getUint32(b+4);const m=new Map();
-        for(let i=0;i<n;i++){const c=dv.getUint32(b+8+i*8),d=dv.getUint32(b+12+i*8);m.set(d,(m.get(d)||0)+c);ctx.frames+=c;}
+        const n=dv.getUint32(b+4);const m=new Map();ctx.sttsE=[];
+        for(let i=0;i<n;i++){const c=dv.getUint32(b+8+i*8),d=dv.getUint32(b+12+i*8);m.set(d,(m.get(d)||0)+c);ctx.frames+=c;ctx.sttsE.push([c,d]);}
         ctx._stts=m;
+      }
+      else if(ctx&&type==="ctts"){
+        const v=dv.getUint8(b),n=dv.getUint32(b+4);ctx.cttsE=[];
+        for(let i=0;i<n;i++)ctx.cttsE.push([dv.getUint32(b+8+i*8),v?dv.getInt32(b+12+i*8):dv.getUint32(b+12+i*8)]);
+      }
+      else if(ctx&&type==="stsz"){
+        const fix=dv.getUint32(b+4),n=dv.getUint32(b+8);ctx.sizes=new Array(n);
+        for(let i=0;i<n;i++)ctx.sizes[i]=fix||dv.getUint32(b+12+i*4);
+      }
+      else if(ctx&&type==="stsc"){
+        const n=dv.getUint32(b+4);ctx.stscE=[];
+        for(let i=0;i<n;i++)ctx.stscE.push([dv.getUint32(b+8+i*12),dv.getUint32(b+12+i*12)]);
+      }
+      else if(ctx&&type==="stco"){
+        const n=dv.getUint32(b+4);ctx.chunks=new Array(n);
+        for(let i=0;i<n;i++)ctx.chunks[i]=dv.getUint32(b+8+i*4);
+      }
+      else if(ctx&&type==="co64"){
+        const n=dv.getUint32(b+4);ctx.chunks=new Array(n);
+        for(let i=0;i<n;i++)ctx.chunks[i]=Number(dv.getBigUint64(b+8+i*8));
+      }
+      else if(ctx&&type==="stss"){
+        const n=dv.getUint32(b+4);ctx.keys=new Set();
+        for(let i=0;i<n;i++)ctx.keys.add(dv.getUint32(b+8+i*4)-1);
       }
       p+=size;
     }
@@ -475,6 +693,920 @@ function parseMov(dv){
   return{meta,tracks};
 }
 
+
+/* ---------- samples & frames ---------- */
+function buildSamples(t){
+  const n=t.sizes.length,s=new Array(n);
+  let si=0,e=0;
+  for(let c=0;c<t.chunks.length;c++){
+    while(e+1<t.stscE.length&&t.stscE[e+1][0]<=c+1)e++;
+    let off=t.chunks[c];
+    for(let j=0;j<t.stscE[e][1]&&si<n;j++){s[si]={off,size:t.sizes[si]};off+=t.sizes[si];si++;}
+  }
+  let dts=0,i=0;
+  for(const [c,d] of t.sttsE)for(let j=0;j<c&&i<n;j++,i++){s[i].dts=dts;s[i].cts=dts;dts+=d;}
+  if(t.cttsE){i=0;for(const [c,o] of t.cttsE)for(let j=0;j<c&&i<n;j++,i++)s[i].cts+=o;}
+  for(i=0;i<n;i++)s[i].key=t.keys?t.keys.has(i):true;
+  return s;
+}
+function codecString(t){
+  const d=t.desc,hex=x=>x.toString(16).padStart(2,"0");
+  if(t.descType==="avcC"&&d)return"avc1."+hex(d[1])+hex(d[2])+hex(d[3]);
+  if(t.descType==="hvcC"&&d){
+    const sp=["","A","B","C"][d[1]>>6],idc=d[1]&31,tier=(d[1]>>5&1)?"H":"L";
+    const comp=((d[2]<<24)|(d[3]<<16)|(d[4]<<8)|d[5])>>>0;let rev=0;
+    for(let i=0;i<32;i++)rev=((rev<<1)|((comp>>>i)&1))>>>0;
+    const cons=[...d.slice(6,12)];while(cons.length&&cons[cons.length-1]===0)cons.pop();
+    return`${t.codec}.${sp}${idc}.${rev.toString(16)}.${tier}${d[12]}`+cons.map(x=>"."+x.toString(16)).join("");
+  }
+  return null;
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const nextFrame=()=>new Promise(r=>{let done=false;const go=()=>{if(!done){done=true;r();}};requestAnimationFrame(go);setTimeout(go,120);});
+
+/* Frame access in presentation order. Each iterate() decodes from the preceding keyframe. */
+class Frames{
+  constructor(file,t){
+    this.file=file;this.t=t;this.s=buildSamples(t);this.n=this.s.length;
+    this.pres=this.s.map((_,i)=>i).sort((a,b)=>this.s[a].cts-this.s[b].cts);
+    this.ts=this.pres.map(i=>this.s[i].cts/t.timescale);
+    this.byUs=new Map(this.ts.map((x,i)=>[Math.round(x*1e6),i]));
+    this.mode="seek";this.cache=null;
+  }
+  async init(){
+    const codec=codecString(this.t);
+    if(window.VideoDecoder&&codec){
+      this.cfg={codec,description:this.t.desc};
+      try{
+        const r=await VideoDecoder.isConfigSupported(this.cfg);
+        if(r.supported){this.mode="codecs";let ok=false;await this.iterate(0,0,async()=>{ok=true;});if(!ok)this.mode="seek";}
+      }catch(e){this.mode="seek";}
+    }
+    if(this.mode==="seek"){
+      const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(this.file);
+      await new Promise((res,rej)=>{v.onloadeddata=res;v.onerror=()=>rej(new Error("この動画は再生できません"));});
+      this.video=v;
+    }
+  }
+  async bytes(d){
+    const s=this.s[d];
+    if(!this.cache||s.off<this.cache.a||s.off+s.size>this.cache.b){
+      let a=s.off,b=s.off+s.size;
+      for(let j=d+1;j<Math.min(this.n,d+24);j++){const q=this.s[j];if(q.off<a||q.off+q.size-a>8e6)break;b=Math.max(b,q.off+q.size);}
+      this.cache={a,b,u8:new Uint8Array(await this.file.slice(a,b).arrayBuffer())};
+    }
+    return this.cache.u8.subarray(s.off-this.cache.a,s.off-this.cache.a+s.size);
+  }
+  async iterate(a,b,cb,sig={}){
+    if(this.mode==="seek"){
+      const v=this.video;
+      for(let i=a;i<=b&&!sig.stop;i++){
+        await new Promise(r=>{const h=()=>{v.removeEventListener("seeked",h);r();};v.addEventListener("seeked",h);v.currentTime=this.ts[i]-this.ts[0]+.0005;});
+        await cb(v,i);
+      }
+      return;
+    }
+    let lo=this.n,hi=0;
+    for(let i=a;i<=b;i++){const d=this.pres[i];lo=Math.min(lo,d);hi=Math.max(hi,d);}
+    while(lo>0&&!this.s[lo].key)lo--;
+    const q=[];let err=null,flushed=false,flushing=false,next=lo;
+    const dec=new VideoDecoder({output:f=>q.push(f),error:e=>{err=e;}});
+    dec.configure(this.cfg);
+    try{
+      while(!sig.stop&&!err){
+        if(q.length){
+          const f=q.shift(),i=this.byUs.get(f.timestamp);
+          try{if(i>=a&&i<=b)await cb(f,i);}finally{f.close();}
+          if(i>=b)break;
+          continue;
+        }
+        if(next<=hi&&dec.decodeQueueSize<4){
+          const s=this.s[next],data=await this.bytes(next);
+          dec.decode(new EncodedVideoChunk({type:s.key?"key":"delta",timestamp:Math.round(s.cts/this.t.timescale*1e6),data}));
+          next++;continue;
+        }
+        if(next>hi&&!flushing){flushing=true;dec.flush().then(()=>{flushed=true;},e=>{err=e;});}
+        if(flushed&&!q.length)break;
+        await wait(2);
+      }
+      if(err)throw err;
+    }finally{
+      q.forEach(f=>f.close());
+      try{dec.close();}catch(e){}
+    }
+  }
+}
+function drawFrame(ctx,src,m,ox=0,oy=0){
+  ctx.setTransform(1,0,0,1,-ox,-oy);
+  if(src instanceof HTMLVideoElement)ctx.drawImage(src,0,0,m.W,m.H);
+  else{
+    if(m.rot===90){ctx.translate(m.W,0);ctx.rotate(Math.PI/2);}
+    else if(m.rot===180){ctx.translate(m.W,m.H);ctx.rotate(Math.PI);}
+    else if(m.rot===270){ctx.translate(0,m.H);ctx.rotate(-Math.PI/2);}
+    ctx.drawImage(src,0,0,src.displayWidth,src.displayHeight);
+  }
+  ctx.setTransform(1,0,0,1,0,0);
+}
+function lumaOf(ctx,w,h){
+  const d=ctx.getImageData(0,0,w,h).data,y=new Uint8Array(w*h);
+  for(let i=0,j=0;j<y.length;i+=4,j++)y[j]=(d[i]*77+d[i+1]*150+d[i+2]*29)>>8;
+  return y;
+}
+
+/* ---------- ball measurement ---------- */
+/* Fit a circle to the ball's edge using colour gradients. A shaded ball can match the grass in brightness, so brightness alone only finds its lit rim. */
+function fitBallCircle(px,w,h,cx,cy,reach,rMin,rMax){
+  const n=w*h,S0=new Float32Array(n*3);
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+    const o=y*w+x;
+    for(let c=0;c<3;c++){
+      const at=(q)=>px[q*4+c];
+      S0[o*3+c]=(at(o)*4+(at(o-1)+at(o+1)+at(o-w)+at(o+w))*2+at(o-w-1)+at(o-w+1)+at(o+w-1)+at(o+w+1))/16;
+    }
+  }
+  const Gx=new Float32Array(n*3),Gy=new Float32Array(n*3);
+  for(let y=2;y<h-2;y++)for(let x=2;x<w-2;x++){
+    const o=y*w+x;
+    for(let c=0;c<3;c++){Gx[o*3+c]=S0[(o+1)*3+c]-S0[(o-1)*3+c];Gy[o*3+c]=S0[(o+w)*3+c]-S0[(o-w)*3+c];}
+  }
+  const AN=36,cs=[],sn=[];
+  for(let a=0;a<AN;a++){cs.push(Math.cos(a/AN*6.2832));sn.push(Math.sin(a/AN*6.2832));}
+  const edge=(x,y,c,s)=>{
+    const ix=Math.round(x),iy=Math.round(y);
+    if(ix<2||iy<2||ix>=w-2||iy>=h-2)return 0;
+    const o=(iy*w+ix)*3;
+    return Math.abs(Gx[o]*c+Gy[o]*s)+Math.abs(Gx[o+1]*c+Gy[o+1]*s)+Math.abs(Gx[o+2]*c+Gy[o+2]*s);
+  };
+  let best=null;
+  for(let y=cy-reach;y<=cy+reach;y++)for(let x=cx-reach;x<=cx+reach;x++){
+    if((x-cx)*(x-cx)+(y-cy)*(y-cy)>reach*reach)continue;
+    for(let r=rMin;r<=rMax;r++){
+      let sum=0;const vals=[];
+      for(let a=0;a<AN;a++){const e=Math.min(120,edge(x+cs[a]*r,y+sn[a]*r,cs[a],sn[a]));vals.push(e);sum+=e;}
+      // A real ball has an edge most of the way round: favour coverage over a few strong pixels.
+      vals.sort((p,q)=>p-q);
+      let sc=sum/AN*.5+vals[AN>>2]*.5;
+      if(best&&sc<=best.sc)continue;
+      // The tee stem and the grass have strong edges too; the inside of a ball is light and nearly colourless.
+      let Y=0,sat=0;
+      for(let a=0;a<8;a++){
+        const ix=Math.round(x+cs[a*4]*r*.55),iy=Math.round(y+sn[a*4]*r*.55),o=(iy*w+ix)*3;
+        const R=S0[o],G=S0[o+1],B=S0[o+2],mx=Math.max(R,G,B);
+        Y+=(R*77+G*150+B*29)/256/8;sat+=(mx-Math.min(R,G,B))/Math.max(1,mx)/8;
+      }
+      sc*=Math.max(0,Math.min(1,(Y-45)/50))*Math.max(0,Math.min(1,(.42-sat)/.2));
+      if(!best||sc>best.sc)best={x,y,r,sc};
+    }
+  }
+  if(!best||best.sc<12)return null;
+  // Refine: strongest edge along each ray, then a trimmed least-squares circle.
+  let{x,y,r}=best;
+  for(let pass=0;pass<3;pass++){
+    let P=[];
+    for(let a=0;a<AN*2;a++){
+      const c=Math.cos(a/AN*3.1416),s=Math.sin(a/AN*3.1416);
+      // Bilinear edge profile along the ray, with a parabola through the peak for sub-pixel position.
+      const prof=[];
+      for(let q=-3;q<=3;q+=.5){
+        const u=x+c*(r+q),v=y+s*(r+q),iu=Math.floor(u),iv=Math.floor(v),fu=u-iu,fv=v-iv;
+        prof.push(edge(iu,iv,c,s)*(1-fu)*(1-fv)+edge(iu+1,iv,c,s)*fu*(1-fv)+edge(iu,iv+1,c,s)*(1-fu)*fv+edge(iu+1,iv+1,c,s)*fu*fv);
+      }
+      let bi=0;prof.forEach((e,i)=>{if(e>prof[bi])bi=i;});
+      if(prof[bi]<=12||bi===0||bi===prof.length-1)continue;
+      const den=prof[bi-1]-2*prof[bi]+prof[bi+1],q=r-3+(bi+(den<0?.5*(prof[bi-1]-prof[bi+1])/den:0))*.5;
+      P.push([x+c*q,y+s*q]);
+    }
+    if(P.length<12)break;
+    for(let trim=0;trim<2;trim++){
+      let A=[[0,0,0],[0,0,0],[0,0,0]],B=[0,0,0];
+      for(const[u,v]of P){const row=[u,v,1],z=u*u+v*v;for(let i=0;i<3;i++){B[i]+=row[i]*z;for(let j=0;j<3;j++)A[i][j]+=row[i]*row[j];}}
+      const so=solve3(A,B);if(!so)return{x,y,d:r*2,sc:best.sc};
+      x=so[0]/2;y=so[1]/2;r=Math.sqrt(Math.max(1,so[2]+x*x+y*y));
+      const res=P.map(p=>Math.abs(Math.hypot(p[0]-x,p[1]-y)-r)),lim=[...res].sort((m,o)=>m-o)[Math.floor(res.length*.75)]+.25;
+      P=P.filter((_,i)=>res[i]<=lim);
+    }
+  }
+  return{x,y,d:r*2,sc:best.sc};
+}
+function ncc(a,b){
+  let ma=0,mb=0;const n=a.length;
+  for(let i=0;i<n;i++){ma+=a[i];mb+=b[i];}
+  ma/=n;mb/=n;
+  let sab=0,saa=0,sbb=0;
+  for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;sab+=x*y;saa+=x*x;sbb+=y*y;}
+  return sab/Math.sqrt(saa*sbb+1e-6);
+}
+/* Moving bright blobs: min(|Yi-Yi-1|,|Yi-Yi+1|) removes still objects, including practice balls in the field. */
+function findCands(prev,cur,next,w,h,A0,ox,oy){
+  const n=w*h,mask=new Uint8Array(n);
+  for(let i=0;i<n;i++){
+    const a=cur[i]-prev[i],b=cur[i]-next[i];
+    if(Math.min(a<0?-a:a,b<0?-b:b)>16)mask[i]=1;
+  }
+  const out=[],st=[];
+  for(let s=0;s<n;s++){
+    if(!mask[s])continue;
+    mask[s]=0;st.push(s);
+    let A=0,sx=0,sy=0,sxx=0,syy=0,sxy=0,sum=0;
+    while(st.length){
+      const o=st.pop(),x=o%w,y=o/w|0;
+      A++;sx+=x;sy+=y;sxx+=x*x;syy+=y*y;sxy+=x*y;sum+=cur[o];
+      if(x>0&&mask[o-1]){mask[o-1]=0;st.push(o-1);}
+      if(x<w-1&&mask[o+1]){mask[o+1]=0;st.push(o+1);}
+      if(y>0&&mask[o-w]){mask[o-w]=0;st.push(o-w);}
+      if(y<h-1&&mask[o+w]){mask[o+w]=0;st.push(o+w);}
+    }
+    if(A<Math.max(4,A0*.012)||A>A0*5)continue;
+    const mx=sx/A,my=sy/A,cxx=sxx/A-mx*mx,cyy=syy/A-my*my,cxy=sxy/A-mx*my,dd=Math.sqrt((cxx-cyy)*(cxx-cyy)+4*cxy*cxy);
+    const el=Math.sqrt((cxx+cyy+dd)/Math.max(.25,cxx+cyy-dd));
+    if(el>5)continue;
+    out.push({x:mx+ox,y:my+oy,A,q:.55+.45*(sum/A/255)-.1*Math.max(0,el-2)});
+  }
+  return out.sort((a,b)=>b.q-a.q).slice(0,30);
+}
+/* Beam search through candidate blobs: a ball leaves the tee upward and its steps shrink as it recedes. */
+function trackBall(cands,I,last,tee,d,fps){
+  const maxStep=d*90/.0427/fps*.6;
+  let beam=[{p:[],s:0}];
+  for(let i=I;i<=last;i++){
+    const nx=[];
+    for(const h of beam){
+      const L=h.p[h.p.length-1];
+      if(!L||i-L.i<3)nx.push({p:h.p,s:h.s-(L?.3:0)});else nx.push({p:h.p,s:h.s,end:true});
+      if(h.end)continue;
+      if(!L&&i>I+3)continue;
+      for(const c of cands[i]||[]){
+        let cost=0;
+        if(!L){
+          const dx=c.x-tee.x,dy=c.y-tee.y,D=Math.hypot(dx,dy);
+          if(dy>-d*.3||D<d*.5||D>maxStep*(i-I+1.5))continue;
+        }else if(h.p.length===1){
+          const gap=i-L.i,sx=(c.x-L.x)/gap,sy=(c.y-L.y)/gap,vx=L.x-tee.x,vy=L.y-tee.y,S=Math.hypot(sx,sy),U=Math.hypot(vx,vy);
+          if(S>maxStep||S<1)continue;
+          if((sx*vx+sy*vy)/(S*U)<Math.cos(35*Math.PI/180))continue;
+        }else{
+          const P=h.p[h.p.length-2],gp=L.i-P.i,gap=i-L.i,lx=(L.x-P.x)/gp,ly=(L.y-P.y)/gp,LS=Math.hypot(lx,ly);
+          let rho=1;
+          if(h.p.length>2){const Q=h.p[h.p.length-3],g2=P.i-Q.i,ps=Math.hypot(P.x-Q.x,P.y-Q.y)/g2;rho=Math.min(1.05,Math.max(.6,LS/ps));}
+          const res=Math.hypot(c.x-(L.x+lx*rho*gap),c.y-(L.y+ly*rho*gap));
+          if(res>Math.max(10,LS*.4))continue;
+          cost=res*.01;
+        }
+        nx.push({p:[...h.p,{i,x:c.x,y:c.y,q:c.q}],s:h.s+c.q-cost});
+      }
+    }
+    beam=nx.sort((a,b)=>b.s-a.s).slice(0,80);
+  }
+  return beam.filter(h=>h.p.length>=3).slice(0,10).map(h=>h.p);
+}
+
+/* ---------- solving ---------- */
+const RS_FRAC=.9; // sensor readout time as a share of the frame time; fit error and window stability on real 120fps footage are best near 8ms
+const BALL_M=.0427;
+const CD_FACTOR=1.092; // fitted to two SmartTrack driver readings at 2700rpm
+const CLUBS=[{id:"D",v:58,rpm:2700},{id:"3W",v:53,rpm:3600},{id:"UT",v:47,rpm:4400},{id:"5I",v:45,rpm:5300},{id:"7I",v:41,rpm:6500},{id:"9I",v:36,rpm:8000},{id:"PW",v:33,rpm:9000}];
+const PRIOR_SD=8;
+const ROUND_FACTOR=240/202; // owner's round average (230-250yd) over the driver distance measured at the range with range balls
+const FIT_WINDOW=.11; // seconds after impact used for the fit; later frames add model error, not information
+const DRAG_RATE=.25; // deceleration / speed (1/s) just after launch, from the flight model at driver speed
+// iPhone equivalent focal lengths refer to the 4:3 sensor (43.27mm diagonal = 34.6mm width), and 16:9 video keeps that width.
+const focalPx=(W,H,mm)=>Math.max(W,H)*mm/34.6;
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const unit=a=>{const n=Math.sqrt(dot(a,a));return[a[0]/n,a[1]/n,a[2]/n];};
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+function solve3(A,b){
+  const m=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<3;c++){
+    let p=c;for(let r=c+1;r<3;r++)if(Math.abs(m[r][c])>Math.abs(m[p][c]))p=r;
+    [m[c],m[p]]=[m[p],m[c]];
+    if(Math.abs(m[c][c])<1e-12)return null;
+    for(let r=0;r<3;r++)if(r!==c){const f=m[r][c]/m[c][c];for(let j=c;j<4;j++)m[r][j]-=f*m[c][j];}
+  }
+  return[m[0][3]/m[0][0],m[1][3]/m[1][1],m[2][3]/m[2][2]];
+}
+/* p(t)=(T+Bt)/(1+kt), t from impact, T=tee relative to the image centre. tau = impact to first tracked frame, in frames. */
+function fitAt(pts,c,tau){
+  // Distance travelled grows like t-(rate/2)t^2 under drag; substituting that for t keeps the model linear.
+  const Tx=c.tx-c.cx,Ty=c.ty-c.cy,i0=pts[0].i,time=p=>{const t=(p.i-i0+tau)/c.fps+c.rho*((p.q||0)-(c.q0||0))/c.L;return t-.5*DRAG_RATE*t*t;};
+  let s=null,w=pts.map(()=>1);
+  for(let it=0;it<5;it++){
+    const A=[[0,0,0],[0,0,0],[0,0,0]],b=[0,0,0];
+    pts.forEach((p,j)=>{
+      const t=time(p),u=p.x-c.cx,v=p.y-c.cy,g=(s?1/(1+s[2]*t):1)*Math.sqrt(w[j]);
+      for(const[r,y]of[[[t*g,0,-t*u*g],(u-Tx)*g],[[0,t*g,-t*v*g],(v-Ty)*g]])
+        for(let a=0;a<3;a++){b[a]+=r[a]*y;for(let d=0;d<3;d++)A[a][d]+=r[a]*r[d];}
+    });
+    s=solve3(A,b);
+    if(!s||s[2]<=0)return null;
+    w=pts.map(p=>{const t=time(p),q=1+s[2]*t,e=Math.hypot((Tx+s[0]*t)/q-(p.x-c.cx),(Ty+s[1]*t)/q-(p.y-c.cy));return e<2.5?1:2.5/e;});
+  }
+  let e=0;
+  pts.forEach(p=>{const t=time(p),q=1+s[2]*t;e+=((Tx+s[0]*t)/q-(p.x-c.cx))**2+((Ty+s[1]*t)/q-(p.y-c.cy))**2;});
+  return{Bx:s[0],By:s[1],k:s[2],tau,rms:Math.sqrt(e/pts.length)};
+}
+function fitTee(pts,c){
+  let best=null;
+  for(let t=.02;t<=3;t+=.04){const f=fitAt(pts,c,t);if(f&&(!best||f.rms<best.rms))best=f;}
+  if(!best)return null;
+  const t0=best.tau;
+  for(let t=t0-.04;t<=t0+.04;t+=.005){if(t<=0)continue;const f=fitAt(pts,c,t);if(f&&f.rms<best.rms)best=f;}
+  return best;
+}
+function simFlight(V,la,rpm){
+  const m=.04593,r=.02135,A=Math.PI*r*r,rho=1.2,g=9.80665,dt=.01,a=la*Math.PI/180;
+  let x=0,y=0,vx=V*Math.cos(a),vy=V*Math.sin(a),w=rpm*2*Math.PI/60,t=0,apex=0;
+  const out=[{t:0,s:0,h:0}];
+  for(let i=0;i<3000;i++){
+    const sp=Math.hypot(vx,vy),S=w*r/sp,Cd=(.171+.62*S)*CD_FACTOR,Cl=.54*Math.pow(S,.4),q=.5*rho*A*sp/m;
+    const ax=-q*(Cd*vx+Cl*vy),ay=-g+q*(Cl*vx-Cd*vy);
+    vx+=ax*dt;vy+=ay*dt;x+=vx*dt;y+=vy*dt;t+=dt;w*=1-.04*dt;
+    if(y<0){out.push({t,s:x,h:0});break;}
+    apex=Math.max(apex,y);out.push({t,s:x,h:y});
+  }
+  return{path:out,carry:out[out.length-1].s/.9144,apex,flight:t};
+}
+function upVector(S,f){
+  if(!S.hzSet)return[0,-1,0];
+  const cx=S.m.W/2,cy=S.m.H/2,d=p=>[(p.x-cx)/f,(p.y-cy)/f,1];
+  const n=unit(cross(d(S.hz[0]),d(S.hz[1])));
+  return n[1]>0?[-n[0],-n[1],-n[2]]:n;
+}
+function fitCtx(S){
+  const m=S.m,f=focalPx(m.W,m.H,S.mm),L=m.rot%180?m.W:m.H;
+  const qOf=(x,y)=>m.rot===90?m.W-x:m.rot===270?x:m.rot===180?m.H-y:y;
+  return{f,Z:f*BALL_M/S.d,qOf,c:{tx:S.tee.x,ty:S.tee.y,cx:m.W/2,cy:m.H/2,fps:S.fps,rho:RS_FRAC/S.fps,L,q0:qOf(S.tee.x,S.tee.y)}};
+}
+function solveShot(S,rawPts){
+  const{f,Z,qOf,c}=fitCtx(S);
+  let pts=rawPts.map(p=>({...p,q:qOf(p.x,p.y)})).sort((a,b)=>a.i-b.i),F=fitTee(pts,c);
+  if(!F)return null;
+  // Drop one outlier when that clearly improves the fit
+  let dropped=null;
+  if(pts.length>=5&&F.rms>2.5){
+    let bi=-1,bf=null;
+    pts.forEach((_,j)=>{const g=fitTee(pts.filter((_,x)=>x!==j),c);if(g&&(!bf||g.rms<bf.rms)){bf=g;bi=j;}});
+    if(bf&&bf.rms<F.rms*.6){dropped=pts[bi];pts=pts.filter((_,x)=>x!==bi);F=bf;}
+  }
+  const speedOf=g=>Z*Math.hypot(g.Bx/f,g.By/f,g.k);
+  const raw=speedOf(F);
+  let sdJ=null;
+  if(pts.length>=4){
+    const vs=pts.map((_,j)=>{const g=fitTee(pts.filter((_,x)=>x!==j),c);return g?speedOf(g):raw;});
+    const mv=vs.reduce((a,b)=>a+b)/vs.length;
+    sdJ=Math.sqrt((vs.length-1)/vs.length*vs.reduce((a,v)=>a+(v-mv)**2,0));
+  }
+  const club=CLUBS.find(x=>x.id===S.club)||CLUBS[0];
+  const sdM=Math.max(1,sdJ==null?PRIOR_SD:sdJ);
+  const post=1/(1/sdM**2+1/PRIOR_SD**2);
+  const V=post*(raw/sdM**2+club.v/PRIOR_SD**2);
+  const dir=unit([F.Bx/f,F.By/f,F.k]),up=upVector(S,f);
+  const la=Math.asin(dot(dir,up))*180/Math.PI;
+  const flat=v=>{const u=dot(v,up);return unit([v[0]-up[0]*u,v[1]-up[1]*u,v[2]-up[2]*u]);};
+  const dirH=flat(dir),fw=flat([0,0,1]),rt=flat([1,0,0]);
+  const psi=Math.atan2(dot(dirH,rt),dot(dirH,fw))*180/Math.PI;
+  const sim=simFlight(V,la,club.rpm);
+  const tee3=[(S.tee.x-c.cx)/f*Z,(S.tee.y-c.cy)/f*Z,Z];
+  const line=[];
+  for(const p of sim.path){
+    const X=tee3[0]+dirH[0]*p.s+up[0]*p.h,Y=tee3[1]+dirH[1]*p.s+up[1]*p.h,D=tee3[2]+dirH[2]*p.s+up[2]*p.h;
+    if(D<.3)continue;
+    line.push({t:p.t,u:c.cx+f*X/D,v:c.cy+f*Y/D,s:p.s,h:p.h,x:p.s*Math.sin(psi*Math.PI/180),z:p.s*Math.cos(psi*Math.PI/180)});
+  }
+  const n=pts.length,fpsN=Math.min(1,n/6);
+  const conf=fpsN*Math.exp(-((F.rms/3)**2))*(sdJ==null?.5:Math.exp(-((sdJ/(.05*V))**2)))*(1-post/PRIOR_SD**2);
+  return{V,raw,la,psi,club:club.id,rpm:club.rpm,carry:sim.carry,roundYd:sim.carry*ROUND_FACTOR,apex:sim.apex,flight:sim.flight,line,pts,dropped,F,sdJ,conf,n,Z,f,priorShift:V-raw};
+}
+
+/* ---------- common UI ---------- */
+function toast(msg){
+  document.querySelectorAll(".toast").forEach(x=>x.remove());
+  const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.append(t);
+  setTimeout(()=>t.remove(),4200);
+}
+function busy(title,sub,p){
+  $("busy").hidden=!title;
+  if(!title)return;
+  $("busyT").textContent=title;$("busyS").textContent=sub||"";$("busyP").style.width=(p==null?0:p*100)+"%";
+}
+function toVideo(cv,ev,m){
+  const r=cv.getBoundingClientRect(),s=Math.min(r.width/m.W,r.height/m.H);
+  return{x:(ev.clientX-r.left-(r.width-m.W*s)/2)/s,y:(ev.clientY-r.top-(r.height-m.H*s)/2)/s,s};
+}
+
+/* ---------- setup screen ---------- */
+let S=null;
+const sb=$("sBase"),so=$("sOver"),sbx=sb.getContext("2d",{willReadFrequently:true}),sox=so.getContext("2d");
+async function openFile(f,src){
+  if(!f)return;
+  $("setup").hidden=false;$("sGo").disabled=true;
+  sbx.clearRect(0,0,sb.width,sb.height);sox.clearRect(0,0,so.width,so.height);
+  busy("動画を読み込んでいます",f.name,.1);
+  try{
+    const{meta,tracks}=await readMoov(f);
+    showFileInfo(f,src,meta,tracks,null);
+    const vt=tracks.find(t=>t.handler==="vide");
+    if(!vt||!vt.sizes||!vt.chunks)throw new Error("映像トラックを読み取れません");
+    const frames=new Frames(f,vt);await frames.init();
+    const rot=vt.rot||0,W=rot%180?vt.h:vt.w,H=rot%180?vt.w:vt.h;
+    const key=Object.keys(meta).find(x=>x.toLowerCase().includes("focal_length")),mm=key?+meta[key]:null;
+    const avg=vt.frames/vt.duration;
+    S={m:{file:f,name:f.name,frames,W,H,rot,meta},frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
+      hz:[{x:W*.08,y:H*.42},{x:W*.92,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:avg>=200?240:120,fpsFromFile:avg>=100,mm:mm||26,mmFromFile:!!mm};
+    sb.width=so.width=W;sb.height=so.height=H;
+    R.decoder=frames.mode;
+    $("sFrame").max=frames.n-1;$("sFrame").value=0;
+    renderClubs();renderOpts();layoutSetup();
+    await seekSetup(0);
+    drawSetup();
+    busy(null);
+  }catch(e){
+    busy(null);$("setup").hidden=true;
+    toast("読み込めませんでした："+e.message);
+  }
+}
+let sfBusy=false,sfWant=-1;
+async function seekSetup(i){
+  sfWant=i;if(sfBusy)return;
+  sfBusy=true;
+  try{
+    while(sfWant>=0){
+      const j=sfWant;sfWant=-1;
+      await S.m.frames.iterate(j,j,async f=>{drawFrame(sbx,f,S.m);});
+      S.frame=j;
+    }
+  }finally{sfBusy=false;}
+}
+function drawSetup(){
+  const g=sox,{W,H}=S.m,u=Math.max(W,H)/1000;
+  g.clearRect(0,0,W,H);
+  g.lineCap="round";
+  const[a,b]=S.hz;
+  g.setLineDash([10*u,8*u]);g.lineWidth=2.2*u;g.strokeStyle=S.hzSet?"#b6f36a":"rgba(255,255,255,.8)";
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();g.setLineDash([]);
+  for(const p of S.hz){
+    g.beginPath();g.arc(p.x,p.y,11*u,0,7);g.fillStyle=S.hzSet?"#b6f36a":"#fff";g.fill();
+    g.lineWidth=3*u;g.strokeStyle="rgba(0,0,0,.45)";g.stroke();
+  }
+  if(S.tee){
+    g.strokeStyle="#b6f36a";g.lineWidth=2.4*u;
+    g.beginPath();g.arc(S.tee.x,S.tee.y,S.d/2+3*u,0,7);g.stroke();
+    g.beginPath();
+    for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]]){g.moveTo(S.tee.x+dx*(S.d/2+7*u),S.tee.y+dy*(S.d/2+7*u));g.lineTo(S.tee.x+dx*(S.d/2+16*u),S.tee.y+dy*(S.d/2+16*u));}
+    g.stroke();
+  }
+  $("h1").classList.toggle("done",!!S.tee);
+  $("h1s").textContent=S.tee?`コマ ${S.frame+1}`:"";
+  $("h2").classList.toggle("done",S.hzSet);
+  $("h2s").textContent=S.hzSet?`傾き ${pitchText()}`:"傾きの補正";
+  $("sGo").disabled=!S.tee;
+}
+function pitchText(){
+  const f=focalPx(S.m.W,S.m.H,S.mm),up=upVector(S,f);
+  return`${(Math.asin(up[2])*180/Math.PI).toFixed(1)}°`;
+}
+function renderClubs(){
+  $("clubs").innerHTML=CLUBS.map(c=>`<button data-c="${c.id}" class="${c.id===S.club?"on":""}">${c.id}</button>`).join("");
+  $("clubs").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.club=b.dataset.c;renderClubs();});
+}
+function renderOpts(){
+  $("oFps").innerHTML=`${S.fps}`;
+  $("oMm").innerHTML=`${S.mm}<small>mm</small>`;
+  $("oD").innerHTML=`${S.d.toFixed(1)}<small>px</small>`;
+  $("oLensBox").classList.toggle("warn",!S.mmFromFile);
+  $("optTxt").innerHTML=`<b class="num">${S.fps}</b> fps ・ <b class="num ${S.mmFromFile?"":"warn"}">${S.mm}</b> mm${S.mmFromFile?"":'<span class="warn">（要確認）</span>'} ・ 直径 <b class="num">${S.d.toFixed(1)}</b> px`;
+}
+/* Keep the video above the dock, so the ball is never hidden behind it */
+function layoutSetup(){
+  const h=$("setup").clientHeight-$("setupDock").getBoundingClientRect().top+$("setup").getBoundingClientRect().top+8;
+  for(const c of[sb,so]){c.style.bottom="auto";c.style.height=`calc(100% - ${Math.round(h)}px)`;}
+}
+$("optSum").onclick=e=>{
+  const o=$("opts");o.hidden=!o.hidden;e.currentTarget.classList.toggle("open",!o.hidden);
+  layoutSetup();
+};
+window.addEventListener("resize",()=>{if(S&&!$("setup").hidden)layoutSetup();});
+document.querySelectorAll(".opt button").forEach(b=>b.onclick=()=>{
+  const m=b.dataset.d.match(/^([a-z]+)([+-]1)$/),k=m[1],s=+m[2];
+  if(k==="fps"){const L=[60,120,240],i=L.indexOf(S.fps);S.fps=L[Math.max(0,Math.min(2,i+s))];}
+  if(k==="mm"){S.mm=Math.max(13,Math.min(240,S.mm+s));S.mmFromFile=false;}
+  if(k==="d"){S.d=Math.max(4,S.d+s*.5);S.dManual=true;}
+  renderOpts();drawSetup();
+});
+function loupeAt(ev,p){
+  const l=$("loupe"),g=l.getContext("2d"),z=256/(150*S.m.W/1080);
+  l.hidden=false;
+  const rect=$("setup").getBoundingClientRect();
+  l.style.left=Math.min(rect.width-138,Math.max(10,ev.clientX-rect.left-64))+"px";
+  l.style.top=Math.max(10,ev.clientY-rect.top-170)+"px";
+  g.fillStyle="#000";g.fillRect(0,0,256,256);
+  g.save();g.translate(128,128);g.scale(z,z);g.translate(-p.x,-p.y);g.drawImage(sb,0,0);g.drawImage(so,0,0);g.restore();
+  g.strokeStyle="rgba(255,255,255,.7)";g.lineWidth=2;g.beginPath();g.moveTo(128,108);g.lineTo(128,148);g.moveTo(108,128);g.lineTo(148,128);g.stroke();
+}
+let sDrag=null;
+function setTee(p){
+  const{W,H}=S.m,k=Math.max(W,H)/1920,reach=Math.round(k*22),rMax=Math.round(k*34),rad=reach+rMax+6,x0=Math.max(0,Math.round(p.x)-rad),y0=Math.max(0,Math.round(p.y)-rad);
+  const w=Math.min(W-x0,rad*2+1),h=Math.min(H-y0,rad*2+1),d=sbx.getImageData(x0,y0,w,h).data;
+  const r=fitBallCircle(d,w,h,Math.round(p.x)-x0,Math.round(p.y)-y0,reach,Math.max(3,Math.round(k*4)),rMax);
+  if(r){S.tee={x:r.x+x0,y:r.y+y0};if(!S.dManual)S.d=r.d;}else S.tee={x:p.x,y:p.y};
+  S.teeFrame=S.frame;renderOpts();drawSetup();
+}
+so.onpointerdown=ev=>{
+  if(!S)return;
+  so.setPointerCapture(ev.pointerId);
+  const p=toVideo(so,ev,S.m);
+  const reach=44/p.s;
+  let hit=-1;
+  S.hz.forEach((q,i)=>{if(Math.hypot(q.x-p.x,q.y-p.y)<reach)hit=i;});
+  sDrag=hit>=0?{hz:hit}:{tee:true};
+  if(sDrag.tee)S.tee={x:p.x,y:p.y};else{S.hz[hit]={x:p.x,y:p.y};S.hzSet=true;}
+  drawSetup();loupeAt(ev,p);
+};
+so.onpointermove=ev=>{
+  if(!sDrag)return;
+  const p=toVideo(so,ev,S.m);
+  if(sDrag.tee)S.tee={x:p.x,y:p.y};else S.hz[sDrag.hz]=p;
+  drawSetup();loupeAt(ev,p);
+};
+so.onpointerup=so.onpointercancel=ev=>{
+  if(!sDrag)return;
+  if(sDrag.tee)setTee(toVideo(so,ev,S.m));
+  sDrag=null;$("loupe").hidden=true;
+};
+$("sFrame").oninput=e=>{seekSetup(+e.target.value).then(drawSetup);};
+const stepSetup=d=>{const i=Math.max(0,Math.min(S.m.frames.n-1,S.frame+d));$("sFrame").value=i;seekSetup(i).then(drawSetup);};
+$("sPrev").onclick=()=>stepSetup(-1);
+$("sNext").onclick=()=>stepSetup(1);
+$("sBack").onclick=()=>{$("setup").hidden=true;busy(null);};
+
+/* ---------- analysis ---------- */
+async function runAnalysis(){
+  const m=S.m,fr=m.frames,tee=S.tee;
+  const start=Math.min(S.teeFrame==null?S.frame:S.teeFrame,fr.n-1);
+  const mr=Math.max(24,Math.round(S.d*2.2)),mw=mr*2+1,pr=Math.max(8,Math.round(S.d*.75));
+  const pc=document.createElement("canvas");pc.width=pc.height=mw;
+  const px=pc.getContext("2d",{willReadFrequently:true});
+  const crop=Y=>{const o=[];for(let y=mr-pr;y<=mr+pr;y++)for(let x=mr-pr;x<=mr+pr;x++)o.push(Y[y*mw+x]);return o;};
+  let tmpl=null,lows=0,first=-1,I=-1,seen=0;
+  const need=Math.max(4,Math.round(S.fps*.05)),sig={},total=fr.n-start;
+  busy("インパクトを探しています","ボールがテーから消えるコマを探します",0);
+  await fr.iterate(start,fr.n-1,async(f,i)=>{
+    drawFrame(px,f,m,Math.round(tee.x)-mr,Math.round(tee.y)-mr);
+    const Y=lumaOf(px,mw,mw),c=crop(Y);
+    if(!tmpl)tmpl=c;
+    if(ncc(tmpl,c)<.7){
+      if(!lows)first=i;
+      if(++lows>=need){I=first;sig.stop=true;}
+    }else lows=0;
+    if(!(++seen%12)){busy("インパクトを探しています","ボールがテーから消えるコマを探します",seen/total*.6);await wait(0);}
+  },sig);
+  if(I<0)throw new Error("インパクトを見つけられません。ボールがテーにあるコマを選び直してください");
+  // The ball is still in the frames before the club arrives: average its size and position over them.
+  const fitA=Math.max(start,I-Math.round(S.fps*.16)),fitB=Math.max(start,I-Math.round(S.fps*.04)),fits=[];
+  await fr.iterate(fitA,fitB,async f=>{
+    drawFrame(px,f,m,Math.round(tee.x)-mr,Math.round(tee.y)-mr);
+    const q=fitBallCircle(px.getImageData(0,0,mw,mw).data,mw,mw,mr,mr,3,Math.max(3,Math.round(S.d/2)-3),Math.round(S.d/2)+3);
+    if(q)fits.push(q);
+  });
+  if(fits.length>=3){
+    const mid=k=>{const v=fits.map(q=>q[k]).sort((a,b)=>a-b);return v[v.length>>1];};
+    if(!S.dManual)S.d=mid("d");
+    S.tee={x:Math.round(tee.x)-mr+mid("x"),y:Math.round(tee.y)-mr+mid("y")};
+  }
+  // Track
+  const{W,H}=m,rx=Math.round(Math.min(W,H)*.4),up=Math.round(Math.max(W,H)*.5);
+  const x0=Math.max(0,Math.round(tee.x)-rx),x1=Math.min(W,Math.round(tee.x)+rx),y0=Math.max(0,Math.round(tee.y)-up),y1=Math.min(H,Math.round(tee.y+S.d*2));
+  const w=x1-x0,h=y1-y0,rc=document.createElement("canvas");rc.width=w;rc.height=h;
+  const rxx=rc.getContext("2d",{willReadFrequently:true});
+  const a=Math.max(0,I-1),b=Math.min(fr.n-1,I+Math.ceil(S.fps*FIT_WINDOW)+2),Ys={};
+  busy("ボールを追跡しています","",.65);
+  await fr.iterate(a,b,async(f,i)=>{
+    drawFrame(rxx,f,m,x0,y0);Ys[i]=lumaOf(rxx,w,h);
+    busy("ボールを追跡しています","",.65+.25*(i-a)/(b-a+1));
+    await wait(0);
+  });
+  const A0=Math.PI*S.d*S.d/4,cands={};
+  for(let i=a+1;i<b;i++)if(Ys[i-1]&&Ys[i]&&Ys[i+1])cands[i]=findCands(Ys[i-1],Ys[i],Ys[i+1],w,h,A0,x0,y0);
+  const hyps=trackBall(cands,I,b-1,S.tee,S.d,S.fps);
+  busy("計算しています","",.95);
+  await wait(0);
+  let best=null,bestScore=-1e9;
+  for(const p0 of hyps){
+    const p=p0.filter(q=>q.i<=p0[0].i+Math.ceil(S.fps*FIT_WINDOW));
+    if(p.length<3)continue;
+    const r=solveShot(S,p);if(!r)continue;
+    const sc=r.n-r.F.rms*.6-(r.V<15||r.V>95?50:0);
+    if(sc>bestScore){bestScore=sc;best=r;}
+  }
+  R.lastDebug={I,cands:Object.fromEntries(Object.entries(cands).map(([k,v])=>[k,v.length])),hyps:hyps.length,d:+S.d.toFixed(2)};
+  return{I,res:best};
+}
+$("sGo").onclick=async()=>{
+  try{
+    const{I,res}=await runAnalysis();
+    busy(null);
+    const shot={id:Date.now(),no:shots.length+1,S:{...S},I,res,fresh:true};
+    if(!res){shot.res=null;toast("ボールを追跡できませんでした。「補正」で3コマ以上タップしてください");}
+    shots.push(shot);renderShots();
+    $("setup").hidden=true;
+    openReview(shot);
+  }catch(e){busy(null);toast(e.message);}
+};
+
+/* ---------- shot list ---------- */
+const shots=[];
+const shotReport=x=>({no:x.no,file:x.S.m.name,club:x.S.club,fps:x.S.fps,mm:x.S.mm,dPx:+x.S.d.toFixed(2),tee:x.S.tee,horizon:x.S.hzSet?x.S.hz:null,impactFrame:x.I,
+  result:x.res&&{speed:+x.res.V.toFixed(1),rawSpeed:+x.res.raw.toFixed(1),launch:+x.res.la.toFixed(1),dir:+x.res.psi.toFixed(1),carry:Math.round(x.res.carry),roundYd:Math.round(x.res.roundYd),apexM:+x.res.apex.toFixed(1),flightS:+x.res.flight.toFixed(1),spin:x.res.rpm,frames:x.res.n,rms:+x.res.F.rms.toFixed(2),tau:+x.res.F.tau.toFixed(2),k:+x.res.F.k.toFixed(1),depthM:+x.res.Z.toFixed(2),sdJ:x.res.sdJ==null?null:+x.res.sdJ.toFixed(2),conf:+x.res.conf.toFixed(2),pts:x.res.pts.map(p=>[p.i,+p.x.toFixed(1),+p.y.toFixed(1)])}});
+function renderShots(){
+  $("shotsWrap").hidden=!shots.length;
+  $("shots").innerHTML=shots.slice().reverse().map(x=>`<button class="shot" data-id="${x.id}"><div class="club">${x.S.club}</div><div class="num">${x.res?`<b>${Math.round(x.res.carry)}</b><small>yds</small>　<b>${x.res.V.toFixed(1)}</b><small>m/s</small>　<b>${x.res.la.toFixed(1)}</b><small>°</small>`:"<small>未測定</small>"}</div><div class="chev">›</div></button>`).join("");
+  $("shots").querySelectorAll("button").forEach(b=>b.onclick=()=>openReview(shots.find(x=>x.id===+b.dataset.id)));
+  R.analysis=shots.map(shotReport);updReport();
+}
+
+/* ---------- review screen ---------- */
+const rb=$("rBase"),ro=$("rOver"),rbx=rb.getContext("2d"),rox=ro.getContext("2d");
+const P={shot:null,a:0,b:0,clk:0,playing:true,speed:.25,sig:null,idx:0,total:1,tImpact:0,anim:1,fix:false,raf:0,last:0,seekWant:-1,seekBusy:false,hold:.7};
+function layoutShot(){
+  const x=P.shot,s=x.S,r=x.res;
+  P.a=Math.max(0,x.I-Math.round(s.fps));
+  P.b=Math.min(s.m.frames.n-1,x.I+Math.round(s.fps*2));
+  const tauF=r?r.F.tau:0,firstI=r?r.pts[0].i:x.I;
+  P.tImpact=(firstI-tauF-P.a)/s.fps;
+  P.anim=r?Math.min(3.6,r.flight):0;
+  P.total=Math.max((P.b-P.a)/s.fps,P.tImpact+P.anim);
+}
+function openReview(x){
+  P.shot=x;
+  const m=x.S.m;
+  rb.width=ro.width=m.W;rb.height=ro.height=m.H;
+  $("review").hidden=false;$("sheet").classList.remove("open");$("speeds").hidden=true;
+  P.fix=false;$("fixbar").hidden=true;$("rFix").classList.remove("on");
+  layoutShot();updatePanel(x.fresh);
+  P.clk=0;P.playing=true;P.idx=P.a;
+  drawMiniBase();
+  startPump(P.a);
+  cancelAnimationFrame(P.raf);P.last=performance.now();P.raf=requestAnimationFrame(tick);
+  x.fresh=false;
+}
+function closeReview(){
+  stopPump();cancelAnimationFrame(P.raf);$("review").hidden=true;
+}
+function updatePanel(fresh){
+  const x=P.shot,r=x.res,pan=$("panel");
+  $("rTitle").textContent=`ショット #${x.no}`;
+  $("pClub").textContent=x.S.club;
+  const set=(c,v,la)=>{$("pCarry").textContent=c;$("pV").textContent=v;$("pLa").textContent=la;};
+  $("roundEq").hidden=!r||P.fix;
+  if(!r){set("—","—","—");$("confT").textContent="未測定";$("confDot").className="dot ng";return;}
+  $("roundYd").textContent=Math.round(r.roundYd);
+  if(fresh){
+    pan.classList.add("big");
+    const t0=performance.now(),dur=650;
+    const run=now=>{
+      const u=Math.min(1,(now-t0)/dur),e=1-(1-u)**3;
+      set(Math.round(r.carry*e),(r.V*e).toFixed(1),(r.la*e).toFixed(1));
+      if(u<1)requestAnimationFrame(run);else setTimeout(()=>pan.classList.remove("big"),2300);
+    };
+    requestAnimationFrame(run);setTimeout(()=>{if(pan.classList.contains("big"))set(Math.round(r.carry),r.V.toFixed(1),r.la.toFixed(1));},900);
+  }else{pan.classList.remove("big");set(Math.round(r.carry),r.V.toFixed(1),r.la.toFixed(1));}
+  const lv=r.conf>=.6?["ok","信頼度 高"]:r.conf>=.3?["warn","信頼度 中"]:["ng","信頼度 低"];
+  $("confDot").className="dot "+lv[0];
+  $("confT").textContent=lv[1]+`・${r.n}コマ`+(x.S.hzSet?"":"・傾き未補正")+(r.n<4?"・標準値の影響大":"");
+  renderSheet();
+}
+function renderSheet(){
+  const x=P.shot,r=x.res;if(!r)return;
+  const fix=v=>v==null?"—":v.toFixed(1);
+  tiles($("sheetTiles"),[
+    {k:"信頼度",v:`${Math.round(r.conf*100)}<small>%</small>`,st:r.conf>=.6?"ok":r.conf>=.3?"warn":"ng",s:`追跡 ${r.n}コマ${r.dropped?"（1点除外）":""}`},
+    {k:"当てはめ誤差",v:`${r.F.rms.toFixed(2)}<small>px</small>`,s:`一点除外のばらつき ${fix(r.sdJ)} m/s`},
+    {k:"ラウンド換算の飛距離",v:`${Math.round(r.roundYd)}<small>yds</small>`,s:`練習場での値の ${ROUND_FACTOR.toFixed(2)} 倍（ドライバー基準の目安）`,wide:true},
+    {k:"左右方向",v:`${r.psi>=0?"右":"左"} ${Math.abs(r.psi).toFixed(1)}<small>°</small>`,s:"カメラの向きが基準"},
+    {k:"測定のみの初速",v:`${r.raw.toFixed(1)}<small>m/s</small>`,s:Math.abs(r.priorShift)<.05?"標準値の影響なし":`標準値の影響 ${r.priorShift>0?"+":""}${r.priorShift.toFixed(1)} m/s`},
+    {k:"頂点の高さ",v:`${r.apex.toFixed(0)}<small>m</small>`,s:"計算値"},
+    {k:"滞空時間",v:`${r.flight.toFixed(1)}<small>秒</small>`,s:"計算値"},
+    {k:"仮定のスピン",v:`${r.rpm}<small>rpm</small>`,s:`${x.S.club} の標準値（仮）`},
+    {k:"カメラ〜ボール",v:`${r.Z.toFixed(2)}<small>m</small>`,s:`直径 ${x.S.d.toFixed(1)}px / ${x.S.mm}mm / ${x.S.fps}fps`},
+  ]);
+  $("sheetNote").textContent="測定しているのは飛び出した直後の初速と打ち出し角です。スピンは測れないためクラブ別の標準値を仮定しており、キャリー・弾道ライン・ミニマップは、そこから計算したものです。キャリーは練習場の球での値で、ラウンド換算はラウンドの平均飛距離を基準にした目安です。";
+}
+function stopPump(){if(P.sig){P.sig.stop=true;P.sig=null;}}
+function startPump(from){
+  stopPump();
+  const sig={},x=P.shot,s=x.S,fr=s.m.frames,fps=s.fps;
+  P.sig=sig;
+  fr.iterate(from,P.b,async(f,i)=>{
+    const due=(i-P.a)/fps;
+    while(!sig.stop&&P.clk<due-1e-4)await nextFrame();
+    if(sig.stop)return;
+    if(P.clk-due<1.5/fps||i===P.b){drawFrame(rbx,f,s.m);P.idx=i;}
+  },sig).catch(e=>{if(!sig.stop)toast("再生エラー："+e.message);});
+}
+function requestShow(i){
+  P.seekWant=i;if(P.seekBusy)return;
+  P.seekBusy=true;
+  (async()=>{
+    try{
+      while(P.seekWant>=0){
+        const j=P.seekWant;P.seekWant=-1;
+        await P.shot.S.m.frames.iterate(j,j,async f=>{drawFrame(rbx,f,P.shot.S.m);});
+        P.idx=j;
+      }
+    }catch(e){toast("表示エラー："+e.message);}
+    P.seekBusy=false;
+  })();
+}
+function tracerTime(dt,r){
+  const head=.35;
+  if(dt<head)return dt;
+  const a=P.anim,k=a>head?(r.flight-head)/(a-head):1;
+  return Math.min(r.flight,head+(dt-head)*k);
+}
+function drawTracer(g,line,T,W,H){
+  let n=0;while(n<line.length&&line[n].t<=T)n++;
+  if(n<2)return;
+  const u=Math.max(W,H)/1000,root=8.5*u,tip=2.4*u,step=5*u;
+  // Taper and fade by distance on screen: the far part of a flight covers few pixels but most of the time.
+  let len=0;const pts=[line[0]];
+  for(let i=1;i<n;i++){
+    const d=Math.hypot(line[i].u-line[i-1].u,line[i].v-line[i-1].v);len+=d;line[i].a=len;
+    if(len-pts[pts.length-1].a>=step||i===n-1)pts.push(line[i]);
+  }
+  line[0].a=0;
+  g.save();g.lineJoin="round";g.shadowColor="rgba(255,59,59,.5)";g.shadowBlur=7*u;
+  for(let i=1;i<pts.length;i++){
+    const f=pts[i].a/len,fade=Math.min(1,f/.3),last=i===pts.length-1;
+    g.lineCap=fade<1?"butt":"round";
+    g.lineWidth=root+(tip-root)*Math.pow(f,.7);
+    g.strokeStyle=`rgba(255,${Math.round(59+90*(1-fade))},59,${.2+.8*fade})`;
+    g.beginPath();g.moveTo(pts[i-1].u,pts[i-1].v);g.lineTo(pts[i].u,pts[i].v);g.stroke();
+    if(last){g.lineCap="round";g.fillStyle="#fff";g.shadowColor="#ff3b3b";g.shadowBlur=12*u;g.beginPath();g.arc(pts[i].u,pts[i].v,tip*.75,0,7);g.fill();}
+  }
+  g.restore();
+}
+function drawOver(T){
+  const x=P.shot,m=x.S.m,g=rox;
+  g.clearRect(0,0,m.W,m.H);
+  const r=x.res;
+  if(r&&T>0)drawTracer(g,r.line,T,m.W,m.H);
+  if(P.fix){
+    const u=Math.max(m.W,m.H)/1000,R0=(r?r.pts:x.manual||[]);
+    if(r){
+      const{c}=fitCtx(x.S),Tx=c.tx-c.cx,Ty=c.ty-c.cy,F=r.F;
+      g.strokeStyle="rgba(182,243,106,.8)";g.lineWidth=1.6*u;g.beginPath();
+      for(let t=0;t<.2;t+=.004){const q=1+F.k*t,a=c.cx+(Tx+F.Bx*t)/q,b=c.cy+(Ty+F.By*t)/q;t?g.lineTo(a,b):g.moveTo(a,b);}
+      g.stroke();
+    }
+    g.lineWidth=2*u;
+    for(const p of R0){
+      const on=p.i===P.idx;
+      g.strokeStyle=on?"#ff3b3b":"#b6f36a";
+      g.beginPath();g.arc(p.x,p.y,on?11*u:7*u,0,7);g.stroke();
+    }
+  }
+}
+function tick(now){
+  P.raf=requestAnimationFrame(tick);
+  const dt=Math.min(.1,(now-P.last)/1000);P.last=now;
+  const x=P.shot;if(!x)return;
+  if(P.playing){
+    P.clk+=dt*P.speed;
+    if(P.clk>=P.total+P.hold){P.clk=0;P.idx=P.a;startPump(P.a);}
+    if(!P.drag)$("rScrub").value=Math.min(1000,P.clk/P.total*1000);
+  }
+  const r=x.res,T=r?tracerTime(Math.max(0,P.clk-P.tImpact),r):0;
+  drawOver(P.clk>P.tImpact?T:0);
+  drawMini(P.clk>P.tImpact?T:0);
+}
+function setPlaying(on,flash){
+  if(on===P.playing)return;
+  P.playing=on;
+  if(on){P.clk=Math.min(P.clk,(P.b-P.a)/P.shot.S.fps);startPump(Math.max(P.a,Math.min(P.b,P.a+Math.floor(P.clk*P.shot.S.fps))));}
+  else stopPump();
+  if(flash){
+    const fl=$("flash");
+    fl.innerHTML=on?'<svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>':'<svg viewBox="0 0 24 24" fill="#fff"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+    fl.classList.remove("show");void fl.offsetWidth;fl.classList.add("show");
+  }
+}
+function stepTo(i){
+  const s=P.shot.S;
+  setPlaying(false);
+  i=Math.max(P.a,Math.min(P.b,i));
+  P.clk=(i-P.a)/s.fps;P.idx=i;$("rScrub").value=P.clk/P.total*1000;
+  requestShow(i);
+}
+$("rPrev").onclick=()=>stepTo(P.idx-1);
+$("rNext").onclick=()=>stepTo(P.idx+1);
+$("rScrub").oninput=e=>{
+  const s=P.shot.S;
+  if(!P.drag){P.drag=true;P.wasPlaying=P.playing;setPlaying(false);$("review").classList.add("scrubbing");e.target.classList.add("drag");}
+  P.clk=e.target.value/1000*P.total;
+  const i=Math.min(P.b,P.a+Math.floor(P.clk*s.fps));P.idx=i;requestShow(i);
+};
+$("rScrub").onchange=e=>{
+  P.drag=false;$("review").classList.remove("scrubbing");e.target.classList.remove("drag");
+  if(P.wasPlaying)setPlaying(true);
+};
+ro.onclick=ev=>{
+  if(P.fix){addFixPoint(ev);return;}
+  if(!$("speeds").hidden){$("speeds").hidden=true;return;}
+  setPlaying(!P.playing,true);
+};
+$("rBack").onclick=()=>{closeReview();};
+$("rDel").onclick=()=>{
+  const i=shots.indexOf(P.shot);if(i>=0)shots.splice(i,1);
+  closeReview();renderShots();
+};
+$("rSpeed").onclick=()=>{$("speeds").hidden=!$("speeds").hidden;};
+$("speeds").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  P.speed=+b.dataset.s;
+  $("speeds").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  $("rSpeed").textContent=b.dataset.s==="1"?"1.0":b.dataset.s;
+  $("speeds").hidden=true;
+});
+$("rMini").onclick=e=>{const m=$("mini");m.hidden=!m.hidden;e.currentTarget.classList.toggle("on",!m.hidden);if(!m.hidden)drawMiniBase();};
+$("miniX").onclick=()=>{$("mini").classList.toggle("large");setTimeout(drawMiniBase,300);};
+$("rInfo").onclick=()=>{if(P.shot.res)$("sheet").classList.add("open");};
+$("sheetX").onclick=()=>$("sheet").classList.remove("open");
+$("rFix").onclick=e=>{
+  P.fix=!P.fix;e.currentTarget.classList.toggle("on",P.fix);
+  $("fixbar").hidden=!P.fix;$("conf").hidden=P.fix;$("roundEq").hidden=P.fix||!P.shot.res;
+  // The ball sits low in the frame; keep the mini map out of the way while correcting.
+  $("mini").hidden=P.fix||!$("rMini").classList.contains("on");
+  if(P.fix){
+    setPlaying(false);
+    const r=P.shot.res,i=r?r.pts[0].i:P.shot.I;
+    stepTo(i);
+  }
+};
+function addFixPoint(ev){
+  const x=P.shot,m=x.S.m,p=toVideo(ro,ev,m);
+  let pts=(x.res?x.res.pts:x.manual||[]).map(q=>({i:q.i,x:q.x,y:q.y}));
+  const near=pts.findIndex(q=>q.i===P.idx&&Math.hypot(q.x-p.x,q.y-p.y)<34/p.s);
+  if(near>=0)pts.splice(near,1);
+  else{pts=pts.filter(q=>q.i!==P.idx);pts.push({i:P.idx,x:p.x,y:p.y});}
+  x.manual=pts;
+  if(pts.length>=3){
+    const r=solveShot(x.S,pts);
+    if(r){x.res=r;layoutShot();updatePanel(false);renderShots();drawMiniBase();}
+  }else{x.res=null;}
+  stepTo(Math.min(P.b,P.idx+1));
+}
+
+/* ---------- mini map ---------- */
+const mc=$("miniC"),mctx=mc.getContext("2d");let miniBg=null;
+function miniProj(x,z,y,w,h){
+  const F=w*.95,back=60,cam=30,hz=h*.2;
+  return{u:w/2+F*x/(z+back),v:hz+F*(cam-y)/(z+back)};
+}
+function drawMiniBase(){
+  const box=$("mini").getBoundingClientRect();
+  if(!box.width)return;
+  const dpr=Math.min(3,devicePixelRatio||1),w=Math.round(box.width*dpr),h=Math.round(box.height*dpr);
+  mc.width=w;mc.height=h;
+  const c=document.createElement("canvas");c.width=w;c.height=h;
+  const g=c.getContext("2d"),hz=miniProj(0,1e6,0,w,h).v;
+  const sky=g.createLinearGradient(0,0,0,hz);sky.addColorStop(0,"#1a2226");sky.addColorStop(1,"#39464a");
+  g.fillStyle=sky;g.fillRect(0,0,w,hz);
+  g.fillStyle="#12281b";g.fillRect(0,hz,w,h-hz);
+  for(let z=0;z<320;z+=25){
+    const a=miniProj(0,z,0,w,h).v,b=miniProj(0,z+25,0,w,h).v;
+    if((z/25)%2){g.fillStyle="rgba(120,170,110,.13)";g.fillRect(0,b,w,a-b);}
+  }
+  g.strokeStyle="rgba(243,246,244,.3)";g.fillStyle="rgba(243,246,244,.62)";g.lineWidth=dpr;g.font=`600 ${9*dpr}px -apple-system,sans-serif`;g.textAlign="center";
+  for(const yd of[50,100,150,200,250]){
+    const R=yd*.9144;g.beginPath();
+    for(let i=0;i<=50;i++){const a=-.5+i*.02,p=miniProj(R*Math.sin(a),R*Math.cos(a),0,w,h);i?g.lineTo(p.u,p.v):g.moveTo(p.u,p.v);}
+    g.stroke();
+    if(yd%100===0){const l=miniProj(0,R,0,w,h);g.fillText(yd,l.u+14*dpr,l.v-2*dpr);}
+  }
+  g.setLineDash([3*dpr,4*dpr]);g.strokeStyle="rgba(243,246,244,.5)";g.beginPath();
+  const p0=miniProj(0,0,0,w,h),p1=miniProj(0,300,0,w,h);g.moveTo(p0.u,p0.v);g.lineTo(p1.u,p1.v);g.stroke();g.setLineDash([]);
+  miniBg=c;
+}
+function drawMini(T){
+  if($("mini").hidden||!miniBg||!mc.width)return;
+  const g=mctx,w=mc.width,h=mc.height,r=P.shot.res;
+  g.clearRect(0,0,w,h);g.drawImage(miniBg,0,0);
+  if(!r||T<=0)return;
+  const dpr=Math.min(3,devicePixelRatio||1);
+  // Ground shadow, then the flight line with a glowing tip
+  g.strokeStyle="rgba(0,0,0,.35)";g.lineWidth=2*dpr;g.lineCap="round";g.beginPath();
+  let tip=null;
+  for(const q of r.line){if(q.t>T)break;const p=miniProj(q.x,q.z,0,w,h);tip?g.lineTo(p.u,p.v):g.moveTo(p.u,p.v);tip=q;}
+  g.stroke();
+  let prev=null;
+  for(const q of r.line){
+    if(q.t>T)break;
+    const p=miniProj(q.x,q.z,q.h,w,h);
+    if(prev){g.strokeStyle="#ff3b3b";g.lineWidth=(3.6-2*Math.min(1,q.t/Math.max(.5,T)))*dpr;g.beginPath();g.moveTo(prev.u,prev.v);g.lineTo(p.u,p.v);g.stroke();}
+    prev=p;
+  }
+  if(prev){
+    g.save();g.shadowColor="#ff3b3b";g.shadowBlur=10*dpr;g.fillStyle="#fff";g.beginPath();g.arc(prev.u,prev.v,2.2*dpr,0,7);g.fill();g.restore();
+  }
+}
 
 /* ---------- report ---------- */
 $("btnCopy").onclick=async()=>{
