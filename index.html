@@ -218,7 +218,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">v1.1</div>
+  <div class="ver">v1.1.1</div>
 </header>
 
 <main>
@@ -430,7 +430,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="1.1";
+const APP_VERSION="1.1.1";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -695,8 +695,9 @@ function parseMov(dv){
         ctx._stts=m;
       }
       else if(ctx&&type==="ctts"){
-        const v=dv.getUint8(b),n=dv.getUint32(b+4);ctx.cttsE=[];
-        for(let i=0;i<n;i++)ctx.cttsE.push([dv.getUint32(b+8+i*8),v?dv.getInt32(b+12+i*8):dv.getUint32(b+12+i*8)]);
+        // Signed in practice: iPhone HEVC files use negative offsets even in version 0 boxes.
+        const n=dv.getUint32(b+4);ctx.cttsE=[];
+        for(let i=0;i<n;i++)ctx.cttsE.push([dv.getUint32(b+8+i*8),dv.getInt32(b+12+i*8)]);
       }
       else if(ctx&&type==="stsz"){
         const fix=dv.getUint32(b+4),n=dv.getUint32(b+8);ctx.sizes=new Array(n);
@@ -781,6 +782,19 @@ class Frames{
       this.video=v;
     }
   }
+  /* Frames around the one asked for stay ready, so stepping does not decode from the keyframe every time. */
+  async show(i,draw){
+    if(!this.mem)this.mem=new Map();
+    const hit=this.mem.get(i);
+    if(hit){this.mem.delete(i);this.mem.set(i,hit);draw(hit);return;}
+    if(this.mode==="seek"){await this.iterate(i,i,async f=>draw(f));return;}
+    await this.iterate(Math.max(0,i-5),Math.min(this.n-1,i+5),async(f,j)=>{
+      if(j===i)draw(f);
+      if(!this.mem.has(j))this.mem.set(j,await createImageBitmap(f));
+    });
+    while(this.mem.size>24){const k=this.mem.keys().next().value;this.mem.get(k).close();this.mem.delete(k);}
+  }
+  drop(){if(this.mem){this.mem.forEach(b=>b.close());this.mem.clear();}}
   async bytes(d){
     const s=this.s[d];
     if(!this.cache||s.off<this.cache.a||s.off+s.size>this.cache.b){
@@ -836,7 +850,7 @@ function drawFrame(ctx,src,m,ox=0,oy=0){
     if(m.rot===90){ctx.translate(m.W,0);ctx.rotate(Math.PI/2);}
     else if(m.rot===180){ctx.translate(m.W,m.H);ctx.rotate(Math.PI);}
     else if(m.rot===270){ctx.translate(0,m.H);ctx.rotate(-Math.PI/2);}
-    ctx.drawImage(src,0,0,src.displayWidth,src.displayHeight);
+    ctx.drawImage(src,0,0,src.displayWidth||src.width,src.displayHeight||src.height);
   }
   ctx.setTransform(1,0,0,1,0,0);
 }
@@ -946,7 +960,7 @@ function ncc(a,b){
   return sab/Math.sqrt(saa*sbb+1e-6);
 }
 /* Moving bright blobs: min(|Yi-Yi-1|,|Yi-Yi+1|) removes still objects, including practice balls in the field. */
-function findCands(prev,cur,next,w,h,A0,ox,oy){
+function findCands(prev,cur,next,w,h,A0,ox,oy,tee){
   const n=w*h,mask=new Uint8Array(n);
   for(let i=0;i<n;i++){
     const a=cur[i]-prev[i],b=cur[i]-next[i];
@@ -965,16 +979,22 @@ function findCands(prev,cur,next,w,h,A0,ox,oy){
       if(y>0&&mask[o-w]){mask[o-w]=0;st.push(o-w);}
       if(y<h-1&&mask[o+w]){mask[o+w]=0;st.push(o+w);}
     }
-    if(A<Math.max(4,A0*.012)||A>A0*5)continue;
+    if(A<Math.max(4,A0*.012)||A>A0*1.5)continue;
     const mx=sx/A,my=sy/A,cxx=sxx/A-mx*mx,cyy=syy/A-my*my,cxy=sxy/A-mx*my,dd=Math.sqrt((cxx-cyy)*(cxx-cyy)+4*cxy*cxy);
     const el=Math.sqrt((cxx+cyy+dd)/Math.max(.25,cxx+cyy-dd));
-    if(el>5)continue;
-    out.push({x:mx+ox,y:my+oy,A,q:.55+.45*(sum/A/255)-.1*Math.max(0,el-2)});
+    // In low light a fast ball is a long streak, and a real one points back at the tee. The club head does not.
+    if(el>16)continue;
+    if(el>2.2){
+      const th=.5*Math.atan2(2*cxy,cxx-cyy),vx=mx+ox-tee.x,vy=my+oy-tee.y,vn=Math.hypot(vx,vy)||1;
+      if(Math.abs(Math.cos(th)*vx+Math.sin(th)*vy)/vn<Math.cos(22*Math.PI/180))continue;
+    }
+    out.push({x:mx+ox,y:my+oy,A,q:.55+.45*(sum/A/255)});
   }
   return out.sort((a,b)=>b.q-a.q).slice(0,30);
 }
 /* Beam search through candidate blobs: a ball leaves the tee upward and its steps shrink as it recedes. */
 function trackBall(cands,I,last,tee,d,fps){
+  const dirBin=h=>h.p.length?Math.round(Math.atan2(h.p[0].x-tee.x,tee.y-h.p[0].y)/(6*Math.PI/180)):99;
   const maxStep=d*90/.0427/fps*.6;
   let beam=[{p:[],s:0}];
   for(let i=I;i<=last;i++){
@@ -983,9 +1003,14 @@ function trackBall(cands,I,last,tee,d,fps){
       const L=h.p[h.p.length-1];
       if(!L||i-L.i<3)nx.push({p:h.p,s:h.s-(L?.3:0)});else nx.push({p:h.p,s:h.s,end:true});
       if(h.end)continue;
-      if(!L&&i>I+3)continue;
+      if(!L&&i>I+Math.ceil(fps*.05))continue; // the club can hide the ball for the first frames
       for(const c of cands[i]||[]){
         let cost=0;
+        if(L){
+          // A straight flight projects to a straight line through the tee, and the ball only gets farther from it.
+          const F=h.p[0],fx=F.x-tee.x,fy=F.y-tee.y,fn=Math.hypot(fx,fy),cx=c.x-tee.x,cy=c.y-tee.y,cn=Math.hypot(cx,cy);
+          if(Math.abs(cx*fy-cy*fx)/fn>Math.max(8,cn*.1)||cn<=Math.hypot(L.x-tee.x,L.y-tee.y))continue;
+        }
         if(!L){
           const dx=c.x-tee.x,dy=c.y-tee.y,D=Math.hypot(dx,dy);
           if(dy>-d*.3||D<d*.5||D>maxStep*(i-I+1.5))continue;
@@ -998,15 +1023,25 @@ function trackBall(cands,I,last,tee,d,fps){
           let rho=1;
           if(h.p.length>2){const Q=h.p[h.p.length-3],g2=P.i-Q.i,ps=Math.hypot(P.x-Q.x,P.y-Q.y)/g2;rho=Math.min(1.05,Math.max(.6,LS/ps));}
           const res=Math.hypot(c.x-(L.x+lx*rho*gap),c.y-(L.y+ly*rho*gap));
-          if(res>Math.max(10,LS*.4))continue;
+          if(res>Math.max(14,LS*.9))continue;
           cost=res*.01;
         }
         nx.push({p:[...h.p,{i,x:c.x,y:c.y,q:c.q}],s:h.s+c.q-cost});
       }
     }
-    beam=nx.sort((a,b)=>b.s-a.s).slice(0,80);
+    // Keep the best paths for each direction out of the tee, so strong club blobs cannot push out a faint ball.
+    const seen=new Map();
+    beam=nx.sort((a,b)=>b.s-a.s).filter(h=>{
+      const k=dirBin(h),n=seen.get(k)||0;seen.set(k,n+1);
+      return n<16;
+    });
   }
-  return beam.filter(h=>h.p.length>=3).slice(0,10).map(h=>h.p);
+  const seen=new Map();
+  return beam.filter(h=>{
+    if(h.p.length<3)return false;
+    const k=dirBin(h),n=seen.get(k)||0;seen.set(k,n+1);
+    return n<3;
+  }).map(h=>h.p);
 }
 
 /* ---------- solving ---------- */
@@ -1054,8 +1089,10 @@ function fitAt(pts,c,tau){
   return{Bx:s[0],By:s[1],k:s[2],tau,rms:Math.sqrt(e/pts.length)};
 }
 function fitTee(pts,c){
+  // The first tracked frame cannot be far from the frame where the ball left the tee.
+  const gap=c.impact==null?null:pts[0].i-c.impact,lo=gap==null?.02:Math.max(.02,gap-1),hi=gap==null?Math.ceil(c.fps*.05)+1:gap+1.5;
   let best=null;
-  for(let t=.02;t<=3;t+=.04){const f=fitAt(pts,c,t);if(f&&(!best||f.rms<best.rms))best=f;}
+  for(let t=lo;t<=hi;t+=.04){const f=fitAt(pts,c,t);if(f&&(!best||f.rms<best.rms))best=f;}
   if(!best)return null;
   const t0=best.tau;
   for(let t=t0-.04;t<=t0+.04;t+=.005){if(t<=0)continue;const f=fitAt(pts,c,t);if(f&&f.rms<best.rms)best=f;}
@@ -1083,7 +1120,7 @@ function upVector(S,f){
 function fitCtx(S){
   const m=S.m,f=focalPx(m.W,m.H,S.mm),L=m.rot%180?m.W:m.H;
   const qOf=(x,y)=>m.rot===90?m.W-x:m.rot===270?x:m.rot===180?m.H-y:y;
-  return{f,Z:f*BALL_M/S.d,qOf,c:{tx:S.tee.x,ty:S.tee.y,cx:m.W/2,cy:m.H/2,fps:S.fps,rho:RS_FRAC/S.fps,L,q0:qOf(S.tee.x,S.tee.y)}};
+  return{f,Z:f*BALL_M/S.d,qOf,c:{tx:S.tee.x,ty:S.tee.y,cx:m.W/2,cy:m.H/2,fps:S.fps,impact:S.impact,rho:RS_FRAC/S.fps,L,q0:qOf(S.tee.x,S.tee.y)}};
 }
 function solveShot(S,rawPts){
   const{f,Z,qOf,c}=fitCtx(S);
@@ -1168,6 +1205,9 @@ async function openFile(f,src){
     R.decoder=frames.mode;
     $("sFrame").max=frames.n-1;$("sFrame").value=0;
     renderClubs();renderOpts();layoutSetup();
+    // A slow-motion export shows uneven frame timing at its ends; a uniform 30fps file is most likely an ordinary video.
+    S.normalVideo=avg<100&&m.frames.t.rates.length===1;
+    if(S.normalVideo)toast("通常速度の動画のようです。ボールが1コマで飛び去るので測定できません。120fps以上のスロー動画を使ってください");
     await seekSetup(0);
     drawSetup();
     busy(null);
@@ -1183,7 +1223,7 @@ async function seekSetup(i){
   try{
     while(sfWant>=0){
       const j=sfWant;sfWant=-1;
-      await S.m.frames.iterate(j,j,async f=>{drawFrame(sbx,f,S.m);});
+      await S.m.frames.show(j,f=>drawFrame(sbx,f,S.m));
       S.frame=j;
     }
   }finally{sfBusy=false;}
@@ -1290,7 +1330,7 @@ so.onpointerup=so.onpointercancel=ev=>{
   sDrag=null;$("loupe").hidden=true;
 };
 $("sFrame").oninput=e=>{seekSetup(+e.target.value).then(drawSetup);};
-const stepSetup=d=>{const i=Math.max(0,Math.min(S.m.frames.n-1,S.frame+d));$("sFrame").value=i;seekSetup(i).then(drawSetup);};
+const stepSetup=d=>{const i=Math.max(0,Math.min(S.m.frames.n-1,+$("sFrame").value+d));$("sFrame").value=i;seekSetup(i).then(drawSetup);};
 $("sPrev").onclick=()=>stepSetup(-1);
 $("sNext").onclick=()=>stepSetup(1);
 $("sBack").onclick=()=>{$("setup").hidden=true;busy(null);};
@@ -1317,6 +1357,7 @@ async function runAnalysis(){
     if(!(++seen%12)){busy("インパクトを探しています","ボールがテーから消えるコマを探します",seen/total*.6);await wait(0);}
   },sig);
   if(I<0)throw new Error("インパクトを見つけられません。ボールがテーにあるコマを選び直してください");
+  S.impact=I;
   // The ball is still in the frames before the club arrives: average its size and position over them.
   const fitA=Math.max(start,I-Math.round(S.fps*.16)),fitB=Math.max(start,I-Math.round(S.fps*.04)),fits=[];
   await fr.iterate(fitA,fitB,async f=>{
@@ -1342,7 +1383,7 @@ async function runAnalysis(){
     await wait(0);
   });
   const A0=Math.PI*S.d*S.d/4,cands={};
-  for(let i=a+1;i<b;i++)if(Ys[i-1]&&Ys[i]&&Ys[i+1])cands[i]=findCands(Ys[i-1],Ys[i],Ys[i+1],w,h,A0,x0,y0);
+  for(let i=a+1;i<b;i++)if(Ys[i-1]&&Ys[i]&&Ys[i+1])cands[i]=findCands(Ys[i-1],Ys[i],Ys[i+1],w,h,A0,x0,y0,S.tee);
   const hyps=trackBall(cands,I,b-1,S.tee,S.d,S.fps);
   busy("計算しています","",.95);
   await wait(0);
@@ -1351,7 +1392,9 @@ async function runAnalysis(){
     const p=p0.filter(q=>q.i<=p0[0].i+Math.ceil(S.fps*FIT_WINDOW));
     if(p.length<3)continue;
     const r=solveShot(S,p);if(!r)continue;
-    const sc=r.n-r.F.rms*.6-(r.V<15||r.V>95?50:0);
+    // Physically impossible or badly fitting paths are not the ball, however long they are.
+    if(r.raw<15||r.raw>95||r.F.rms>4)continue;
+    const sc=r.n-r.F.rms*.6;
     if(sc>bestScore){bestScore=sc;best=r;}
   }
   R.lastDebug={I,cands:Object.fromEntries(Object.entries(cands).map(([k,v])=>[k,v.length])),hyps:hyps.length,d:+S.d.toFixed(2)};
@@ -1359,10 +1402,11 @@ async function runAnalysis(){
 }
 $("sGo").onclick=async()=>{
   try{
+    S.m.frames.drop();
     const{I,res}=await runAnalysis();
     busy(null);
     const shot={id:Date.now(),no:shots.reduce((a,x)=>Math.max(a,x.no),0)+1,at:Date.now(),S:{...S},I,res,fresh:true,landing:null};
-    if(!res){shot.res=null;toast("ボールを追跡できませんでした。「補正」で3コマ以上タップしてください");}
+    if(!res){shot.res=null;toast(S.normalVideo?"通常速度の動画のため測定できませんでした。120fps以上のスロー動画を使ってください":"ボールを追跡できませんでした。「補正」で3コマ以上タップしてください");}
     shots.push(shot);saveShot(shot);renderShots();
     $("setup").hidden=true;
     openReview(shot);
@@ -1491,7 +1535,7 @@ async function openShot(x){
     const f=await dbGet("clips",x.rec.clipKey);
     if(!f)throw new Error("動画が見つかりません");
     const{m}=await loadMovie(f),q=x.rec;
-    x.S={m,frame:q.frame,tee:q.tee,d:q.d,dManual:true,hz:q.hz,hzSet:q.hzSet,club:q.club,fps:q.fps,fpsFromFile:true,mm:q.mm,mmFromFile:q.mmFromFile};
+    x.S={m,frame:q.frame,impact:q.I,tee:q.tee,d:q.d,dManual:true,hz:q.hz,hzSet:q.hzSet,club:q.club,fps:q.fps,fpsFromFile:true,mm:q.mm,mmFromFile:q.mmFromFile};
     x.res=q.pts.length>=3?solveShot(x.S,q.pts):null;
     if(!x.res)x.manual=q.pts;
     openReview(x);
@@ -1556,6 +1600,7 @@ function openReview(x){
 }
 function closeReview(){
   stopPump();cancelAnimationFrame(P.raf);$("review").hidden=true;
+  if(P.shot&&P.shot.S)P.shot.S.m.frames.drop();
 }
 function updatePanel(fresh){
   const x=P.shot,r=x.res,pan=$("panel");
@@ -1618,7 +1663,7 @@ function requestShow(i){
     try{
       while(P.seekWant>=0){
         const j=P.seekWant;P.seekWant=-1;
-        await P.shot.S.m.frames.iterate(j,j,async f=>{drawFrame(rbx,f,P.shot.S.m);});
+        await P.shot.S.m.frames.show(j,f=>drawFrame(rbx,f,P.shot.S.m));
         P.idx=j;
       }
     }catch(e){toast("表示エラー："+e.message);}
@@ -1636,12 +1681,11 @@ function drawTracer(g,line,T,W,H){
   if(n<2)return;
   const u=Math.max(W,H)/1000,root=8.5*u,tip=2.4*u,step=5*u;
   // Taper and fade by distance on screen: the far part of a flight covers few pixels but most of the time.
-  let len=0;const pts=[line[0]];
+  let len=0;line[0].a=0;const pts=[line[0]];
   for(let i=1;i<n;i++){
     const d=Math.hypot(line[i].u-line[i-1].u,line[i].v-line[i-1].v);len+=d;line[i].a=len;
     if(len-pts[pts.length-1].a>=step||i===n-1)pts.push(line[i]);
   }
-  line[0].a=0;
   g.save();g.lineJoin="round";g.shadowColor="rgba(255,59,59,.5)";g.shadowBlur=7*u;
   for(let i=1;i<pts.length;i++){
     const f=pts[i].a/len,fade=Math.min(1,f/.3),last=i===pts.length-1;
