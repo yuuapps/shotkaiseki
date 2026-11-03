@@ -110,7 +110,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 
 /* tab bar */
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:30;display:flex;gap:4px;background:rgba(20,26,28,.78);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--line);border-radius:99px;padding:6px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
-.tab{border:0;background:none;color:var(--sub);font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;width:78px;white-space:nowrap;border-radius:99px}
+.tab{border:0;background:none;color:var(--sub);font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;width:70px;white-space:nowrap;border-radius:99px}
 .tab.on{background:rgba(255,255,255,.1);color:var(--acc)}
 
 /* analysis home */
@@ -201,6 +201,15 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 .sheet.open{transform:none}
 .sheet h3{margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
 .sheet p{color:var(--sub);font-size:12.5px;line-height:1.6;margin:10px 2px 12px}
+.shot .when{color:var(--dim);font-size:11.5px;margin-top:3px}
+.linkbtn{margin-top:10px;background:none;border:1px solid var(--line);border-radius:10px;color:var(--ng);font:inherit;font-size:12.5px;font-weight:600;padding:7px 12px}
+.linkbtn:disabled{color:var(--dim)}
+.landing{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.landing label{display:block;font-size:12px;color:var(--sub);margin-bottom:8px}
+.landing .row{display:flex;align-items:center;gap:8px}
+.landing input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--fg);font:inherit;font-size:16px;padding:8px 10px;-webkit-user-select:text;user-select:text}
+.landing button{border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:700;font-size:13px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--accInk)}
+.landing small{display:block;color:var(--dim);font-size:11.5px;margin-top:8px;line-height:1.5}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 60px);z-index:99;max-width:88vw;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;background:rgba(40,16,16,.94);border:1px solid rgba(255,111,111,.5)}
 </style>
 </head>
@@ -209,7 +218,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">v1.0.1</div>
+  <div class="ver">v1.1</div>
 </header>
 
 <main>
@@ -297,6 +306,21 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
   </details>
 </section>
 
+<!-- ================= HISTORY ================= -->
+<section class="view" id="v-history">
+  <div class="eyebrow">履歴</div>
+  <h2>ショット履歴</h2>
+  <p class="lead" id="histEmpty">解析したショットはここに保存されます。</p>
+  <div class="chips" id="histClubs" style="margin:10px 0 12px"></div>
+  <div class="grid" id="histStats" style="margin-bottom:10px"></div>
+  <div class="shots" id="histList"></div>
+  <div class="tile wide" id="histStore" style="margin-top:12px" hidden>
+    <div class="k" id="histStoreT"></div>
+    <div class="s">動画はこのiPhoneの中に保存され、容量を使います。動画を消しても測定の記録は残ります。</div>
+    <button class="linkbtn" id="histClear">動画をすべて削除</button>
+  </div>
+</section>
+
 <!-- ================= REPORT ================= -->
 <section class="view" id="v-report">
   <div class="eyebrow">結果を送る</div>
@@ -311,6 +335,8 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 </section>
 
 </main>
+
+<div class="screen" id="loadScr" hidden><div class="busy"><b>ショットを開いています</b></div></div>
 
 <!-- ================= SETUP ================= -->
 <div class="screen" id="setup" hidden>
@@ -374,6 +400,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
       </div>
       <button class="gbtn" id="rSpeed" aria-label="再生速度">0.25</button>
     </div>
+    <button class="gbtn" id="rShare" aria-label="共有"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4M5 12v8h14v-8"/></svg></button>
     <button class="gbtn" id="rInfo" aria-label="詳細"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></button>
   </div>
   <div class="transport glass">
@@ -384,12 +411,18 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
   <div class="sheet glass" id="sheet">
     <h3>測定の詳細<button class="gbtn" id="sheetX" aria-label="閉じる" style="width:32px;height:32px">✕</button></h3>
     <div class="grid" id="sheetTiles"></div>
+    <div class="landing">
+      <label for="landIn">実際に最初に落ちた地点（任意）</label>
+      <div class="row"><input type="number" id="landIn" inputmode="numeric" min="1" max="499" placeholder="距離看板が目安"><span>yd</span><button id="landSave">保存</button></div>
+      <small id="landNote"></small>
+    </div>
     <p id="sheetNote"></p>
   </div>
 </div>
 
 <nav class="tabbar">
   <button class="tab on" data-v="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20C9 7 15 4 20 6"/><circle cx="20" cy="6" r="1.5" fill="currentColor"/><path d="M3 20h18"/></svg>解析</button>
+  <button class="tab" data-v="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>履歴</button>
   <button class="tab" data-v="live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>カメラ確認</button>
   <button class="tab" data-v="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 4h8M9 4v2h6V4M6 6h12v15H6z"/><path d="M9 12h6M9 16h4"/></svg>結果</button>
 </nav>
@@ -397,7 +430,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="1.0.1";
+const APP_VERSION="1.1";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -1112,21 +1145,24 @@ function toVideo(cv,ev,m){
 /* ---------- setup screen ---------- */
 let S=null;
 const sb=$("sBase"),so=$("sOver"),sbx=sb.getContext("2d",{willReadFrequently:true}),sox=so.getContext("2d");
+async function loadMovie(f,src){
+  const{meta,tracks}=await readMoov(f);
+  if(src)showFileInfo(f,src,meta,tracks,null);
+  const vt=tracks.find(t=>t.handler==="vide");
+  if(!vt||!vt.sizes||!vt.chunks)throw new Error("映像トラックを読み取れません");
+  const frames=new Frames(f,vt);await frames.init();
+  const rot=vt.rot||0,W=rot%180?vt.h:vt.w,H=rot%180?vt.w:vt.h;
+  const key=Object.keys(meta).find(x=>x.toLowerCase().includes("focal_length"));
+  return{m:{file:f,name:f.name,frames,W,H,rot,meta},mm:key?+meta[key]:null,avg:vt.frames/vt.duration};
+}
 async function openFile(f,src){
   if(!f)return;
   $("setup").hidden=false;$("sGo").disabled=true;
   sbx.clearRect(0,0,sb.width,sb.height);sox.clearRect(0,0,so.width,so.height);
   busy("動画を読み込んでいます",f.name,.1);
   try{
-    const{meta,tracks}=await readMoov(f);
-    showFileInfo(f,src,meta,tracks,null);
-    const vt=tracks.find(t=>t.handler==="vide");
-    if(!vt||!vt.sizes||!vt.chunks)throw new Error("映像トラックを読み取れません");
-    const frames=new Frames(f,vt);await frames.init();
-    const rot=vt.rot||0,W=rot%180?vt.h:vt.w,H=rot%180?vt.w:vt.h;
-    const key=Object.keys(meta).find(x=>x.toLowerCase().includes("focal_length")),mm=key?+meta[key]:null;
-    const avg=vt.frames/vt.duration;
-    S={m:{file:f,name:f.name,frames,W,H,rot,meta},frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
+    const{m,mm,avg}=await loadMovie(f,src),{W,H,frames}=m;
+    S={m,frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
       hz:[{x:W*.08,y:H*.42},{x:W*.92,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:avg>=200?240:120,fpsFromFile:avg>=100,mm:mm||26,mmFromFile:!!mm};
     sb.width=so.width=W;sb.height=so.height=H;
     R.decoder=frames.mode;
@@ -1219,6 +1255,10 @@ function loupeAt(ev,p){
   g.strokeStyle="rgba(255,255,255,.7)";g.lineWidth=2;g.beginPath();g.moveTo(128,108);g.lineTo(128,148);g.moveTo(108,128);g.lineTo(148,128);g.stroke();
 }
 let sDrag=null;
+function moveHorizon(p){
+  S.hz[sDrag.hz]={x:p.x,y:p.y};
+  if(sDrag.both)S.hz[1-sDrag.hz].y=p.y;
+}
 function setTee(p){
   const{W,H}=S.m,k=Math.max(W,H)/1920,reach=Math.round(k*22),rMax=Math.round(k*34),rad=reach+rMax+6,x0=Math.max(0,Math.round(p.x)-rad),y0=Math.max(0,Math.round(p.y)-rad);
   const w=Math.min(W-x0,rad*2+1),h=Math.min(H-y0,rad*2+1),d=sbx.getImageData(x0,y0,w,h).data;
@@ -1233,14 +1273,15 @@ so.onpointerdown=ev=>{
   const reach=44/p.s;
   let hit=-1;
   S.hz.forEach((q,i)=>{if(Math.hypot(q.x-p.x,q.y-p.y)<reach)hit=i;});
-  sDrag=hit>=0?{hz:hit}:{tee:true};
-  if(sDrag.tee)S.tee={x:p.x,y:p.y};else{S.hz[hit]={x:p.x,y:p.y};S.hzSet=true;}
+  // Until the line has been placed, dragging either end moves the whole line, so one drag already gets it close.
+  sDrag=hit>=0?{hz:hit,both:!S.hzSet}:{tee:true};
+  if(sDrag.tee)S.tee={x:p.x,y:p.y};else{moveHorizon(p);S.hzSet=true;}
   drawSetup();loupeAt(ev,p);
 };
 so.onpointermove=ev=>{
   if(!sDrag)return;
   const p=toVideo(so,ev,S.m);
-  if(sDrag.tee)S.tee={x:p.x,y:p.y};else S.hz[sDrag.hz]=p;
+  if(sDrag.tee)S.tee={x:p.x,y:p.y};else moveHorizon(p);
   drawSetup();loupeAt(ev,p);
 };
 so.onpointerup=so.onpointercancel=ev=>{
@@ -1320,11 +1361,12 @@ $("sGo").onclick=async()=>{
   try{
     const{I,res}=await runAnalysis();
     busy(null);
-    const shot={id:Date.now(),no:shots.length+1,S:{...S},I,res,fresh:true};
+    const shot={id:Date.now(),no:shots.reduce((a,x)=>Math.max(a,x.no),0)+1,at:Date.now(),S:{...S},I,res,fresh:true,landing:null};
     if(!res){shot.res=null;toast("ボールを追跡できませんでした。「補正」で3コマ以上タップしてください");}
-    shots.push(shot);renderShots();
+    shots.push(shot);saveShot(shot);renderShots();
     $("setup").hidden=true;
     openReview(shot);
+    saveClip(shot);
   }catch(e){busy(null);toast(e.message);}
 };
 
@@ -1332,12 +1374,160 @@ $("sGo").onclick=async()=>{
 const shots=[];
 const shotReport=x=>({no:x.no,file:x.S.m.name,club:x.S.club,fps:x.S.fps,mm:x.S.mm,dPx:+x.S.d.toFixed(2),tee:x.S.tee,horizon:x.S.hzSet?x.S.hz:null,impactFrame:x.I,
   result:x.res&&{speed:+x.res.V.toFixed(1),rawSpeed:+x.res.raw.toFixed(1),launch:+x.res.la.toFixed(1),dir:+x.res.psi.toFixed(1),carry:Math.round(x.res.carry),roundYd:Math.round(x.res.roundYd),apexM:+x.res.apex.toFixed(1),flightS:+x.res.flight.toFixed(1),spin:x.res.rpm,frames:x.res.n,rms:+x.res.F.rms.toFixed(2),tau:+x.res.F.tau.toFixed(2),k:+x.res.F.k.toFixed(1),depthM:+x.res.Z.toFixed(2),sdJ:x.res.sdJ==null?null:+x.res.sdJ.toFixed(2),conf:+x.res.conf.toFixed(2),pts:x.res.pts.map(p=>[p.i,+p.x.toFixed(1),+p.y.toFixed(1)])}});
+function shotRow(x){
+  const q=x.rec.sum,c=carryOf(x);
+  return`<button class="shot" data-id="${x.id}"><div class="club">${x.rec.club}</div><div class="num">${q?`<b>${Math.round(c)}</b><small>yds</small>　<b>${q.V.toFixed(1)}</b><small>m/s</small>　<b>${q.la.toFixed(1)}</b><small>°</small>`:"<small>未測定</small>"}<div class="when">${esc(new Date(x.at).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}))}${x.landing?` ・ 落下 ${x.landing}yd`:""}${x.rec.hasClip===false?" ・ 動画なし":""}</div></div><div class="chev">›</div></button>`;
+}
+function bindRows(el){el.querySelectorAll("button").forEach(b=>b.onclick=()=>openShot(shots.find(x=>x.id===+b.dataset.id)));}
 function renderShots(){
   $("shotsWrap").hidden=!shots.length;
-  $("shots").innerHTML=shots.slice().reverse().map(x=>`<button class="shot" data-id="${x.id}"><div class="club">${x.S.club}</div><div class="num">${x.res?`<b>${Math.round(x.res.carry)}</b><small>yds</small>　<b>${x.res.V.toFixed(1)}</b><small>m/s</small>　<b>${x.res.la.toFixed(1)}</b><small>°</small>`:"<small>未測定</small>"}</div><div class="chev">›</div></button>`).join("");
-  $("shots").querySelectorAll("button").forEach(b=>b.onclick=()=>openReview(shots.find(x=>x.id===+b.dataset.id)));
-  R.analysis=shots.map(shotReport);updReport();
+  $("shots").innerHTML=shots.slice(-3).reverse().map(shotRow).join("");
+  bindRows($("shots"));
+  R.analysis=shots.slice(-5).map(x=>x.rec.report);updReport();
+  renderHistory();
 }
+let histClub="ALL";
+function statOf(v,dec){
+  const n=v.length,m=v.reduce((a,b)=>a+b,0)/n,sd=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):null;
+  return{v:m.toFixed(dec),s:sd==null?"":`ばらつき ±${sd.toFixed(dec)}`};
+}
+function renderHistory(){
+  const clubs=[...new Set(shots.map(x=>x.rec.club))];
+  if(histClub!=="ALL"&&!clubs.includes(histClub))histClub="ALL";
+  $("histClubs").innerHTML=["ALL",...CLUBS.map(c=>c.id).filter(c=>clubs.includes(c))].map(c=>`<button data-c="${c}" class="${c===histClub?"on":""}">${c==="ALL"?"すべて":c}</button>`).join("");
+  $("histClubs").querySelectorAll("button").forEach(b=>b.onclick=()=>{histClub=b.dataset.c;renderHistory();});
+  const list=shots.filter(x=>histClub==="ALL"||x.rec.club===histClub),ok=list.filter(x=>x.rec.sum);
+  $("histEmpty").hidden=!!shots.length;
+  if(ok.length&&histClub!=="ALL"){
+    const V=statOf(ok.map(x=>x.rec.sum.V),1),L=statOf(ok.map(x=>x.rec.sum.la),1),C=statOf(ok.map(carryOf),0),Rd=statOf(ok.map(x=>carryOf(x)*ROUND_FACTOR),0),cal=calOf(histClub);
+    tiles($("histStats"),[
+      {k:"平均キャリー",v:`${C.v}<small>yds</small>`,s:C.s},
+      {k:"ラウンド換算",v:`${Rd.v}<small>yds</small>`,s:Rd.s},
+      {k:"平均初速",v:`${V.v}<small>m/s</small>`,s:V.s},
+      {k:"平均打ち出し角",v:`${L.v}<small>°</small>`,s:L.s},
+      {k:"落下地点による補正",v:cal.n>=CAL_MIN?`×${cal.f.toFixed(2)}`:"なし",wide:true,s:cal.n>=CAL_MIN?`${cal.n}球の入力から計算`:`あと${CAL_MIN-cal.n}球の入力で補正を始めます`},
+    ]);
+  }else $("histStats").innerHTML=ok.length?`<div class="tile wide"><div class="s" style="margin:0">クラブを選ぶと平均とばらつきを表示します</div></div>`:"";
+  $("histList").innerHTML=list.slice().reverse().map(shotRow).join("");
+  bindRows($("histList"));
+  renderStorage();
+}
+async function renderStorage(){
+  const n=new Set(shots.filter(x=>x.rec.hasClip).map(x=>x.rec.clipKey)).size;
+  let used="";
+  try{const e=await navigator.storage.estimate();used=` ・ 使用量 約${Math.round(e.usage/1048576)}MB`;}catch(e){}
+  $("histStore").hidden=!shots.length;
+  $("histStoreT").textContent=`保存中の動画 ${n}本${used}`;
+  $("histClear").disabled=!n;
+}
+$("histClear").onclick=async()=>{
+  if(!confirm("保存した動画をすべて削除します。測定の記録は残りますが、弾道ラインの再生はできなくなります。"))return;
+  await dbClear("clips");
+  for(const x of shots){x.rec.hasClip=false;await dbPut("shots",x.rec);if(x!==P.shot)x.S=null;}
+  renderShots();
+};
+
+/* ---------- saved history ---------- */
+let dbOpen=null;
+function db(){
+  if(!dbOpen)dbOpen=new Promise((res,rej)=>{
+    const q=indexedDB.open("shotkaiseki",1);
+    q.onupgradeneeded=()=>{q.result.createObjectStore("shots",{keyPath:"id"});q.result.createObjectStore("clips");};
+    q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);
+  });
+  return dbOpen;
+}
+async function dbDo(store,mode,fn){
+  const d=await db();
+  return new Promise((res,rej)=>{
+    const tx=d.transaction(store,mode);let out;
+    const q=fn(tx.objectStore(store));
+    if(q)q.onsuccess=()=>{out=q.result;};
+    tx.oncomplete=()=>res(out);tx.onerror=tx.onabort=()=>rej(tx.error);
+  });
+}
+const dbPut=(store,v,k)=>dbDo(store,"readwrite",o=>k===undefined?o.put(v):o.put(v,k));
+const dbGet=(store,k)=>dbDo(store,"readonly",o=>o.get(k));
+const dbAll=store=>dbDo(store,"readonly",o=>o.getAll());
+const dbDel=(store,k)=>dbDo(store,"readwrite",o=>o.delete(k));
+const dbClear=store=>dbDo(store,"readwrite",o=>o.clear());
+const clipKeyOf=f=>`${f.name}|${f.size}|${f.lastModified}`;
+function makeRec(x){
+  const s=x.S,r=x.res,old=x.rec||{};
+  return{id:x.id,no:x.no,at:x.at,file:s.m.name,clipKey:old.clipKey||clipKeyOf(s.m.file),hasClip:old.hasClip,club:s.club,fps:s.fps,mm:s.mm,mmFromFile:s.mmFromFile,d:s.d,tee:s.tee,hz:s.hz,hzSet:s.hzSet,frame:s.frame,I:x.I,landing:x.landing,
+    pts:(r?r.pts:x.manual||[]).map(p=>({i:p.i,x:p.x,y:p.y})),
+    sum:r&&{V:r.V,la:r.la,psi:r.psi,carry:r.carry,n:r.n,conf:r.conf},report:shotReport(x)};
+}
+function saveShot(x){
+  x.rec=makeRec(x);
+  dbPut("shots",x.rec).catch(e=>toast("記録を保存できませんでした："+e.message));
+}
+async function saveClip(x){
+  try{
+    if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+    await dbPut("clips",x.S.m.file,x.rec.clipKey);
+    x.rec.hasClip=true;
+  }catch(e){
+    x.rec.hasClip=false;
+    toast("容量が足りず、動画は保存できませんでした。記録は保存しました");
+  }
+  await dbPut("shots",x.rec).catch(()=>{});
+  renderShots();
+}
+async function loadHistory(){
+  try{
+    const all=await dbAll("shots");
+    all.sort((a,b)=>a.at-b.at);
+    for(const rec of all)shots.push({id:rec.id,no:rec.no,at:rec.at,S:null,I:rec.I,res:null,rec,landing:rec.landing});
+    renderShots();
+  }catch(e){}
+}
+/* Saved shots keep only the measurements; rebuild the frames and the flight line when one is opened. */
+async function openShot(x){
+  if(x.S){openReview(x);return;}
+  if(!x.rec.hasClip){toast("このショットの動画は保存されていません。数値は履歴で確認できます");return;}
+  $("loadScr").hidden=false;
+  try{
+    const f=await dbGet("clips",x.rec.clipKey);
+    if(!f)throw new Error("動画が見つかりません");
+    const{m}=await loadMovie(f),q=x.rec;
+    x.S={m,frame:q.frame,tee:q.tee,d:q.d,dManual:true,hz:q.hz,hzSet:q.hzSet,club:q.club,fps:q.fps,fpsFromFile:true,mm:q.mm,mmFromFile:q.mmFromFile};
+    x.res=q.pts.length>=3?solveShot(x.S,q.pts):null;
+    if(!x.res)x.manual=q.pts;
+    openReview(x);
+  }catch(e){toast("開けませんでした："+e.message);}
+  $("loadScr").hidden=true;
+}
+
+/* ---------- landing spot calibration ---------- */
+const CAL_MIN=3;
+function calOf(club){
+  const v=shots.filter(x=>x.rec.club===club&&x.landing&&x.rec.sum).map(x=>x.landing/x.rec.sum.carry).sort((a,b)=>a-b);
+  if(!v.length)return{f:1,n:0};
+  const med=v[v.length>>1];
+  return{f:v.length>=CAL_MIN?Math.max(.7,Math.min(1.4,med)):1,n:v.length};
+}
+const carryOf=x=>x.rec.sum?x.rec.sum.carry*calOf(x.rec.club).f:0;
+$("landSave").onclick=()=>{
+  const x=P.shot,v=parseInt($("landIn").value,10);
+  x.landing=v>0&&v<500?v:null;
+  $("landIn").blur();
+  saveShot(x);renderShots();updatePanel(false);
+  toast(x.landing?`落下地点 ${x.landing}yd を保存しました`:"落下地点を消しました");
+};
+
+/* ---------- share ---------- */
+$("rShare").onclick=async()=>{
+  const x=P.shot,f=x.S.m.file,q=x.rec.sum;
+  const text=q?`${x.rec.club} キャリー${Math.round(carryOf(x))}yd 初速${q.V.toFixed(1)}m/s 打ち出し角${q.la.toFixed(1)}°`:"";
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text});
+    else{
+      const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),6e4);
+    }
+  }catch(e){if(e.name!=="AbortError")toast("共有できませんでした："+e.message);}
+};
 
 /* ---------- review screen ---------- */
 const rb=$("rBase"),ro=$("rOver"),rbx=rb.getContext("2d"),rox=ro.getContext("2d");
@@ -1374,17 +1564,17 @@ function updatePanel(fresh){
   const set=(c,v,la)=>{$("pCarry").textContent=c;$("pV").textContent=v;$("pLa").textContent=la;};
   $("roundEq").hidden=!r||P.fix;
   if(!r){set("—","—","—");$("confT").textContent="未測定";$("confDot").className="dot ng";return;}
-  $("roundYd").textContent=Math.round(r.roundYd);
+  const carry=carryOf(x);$("roundYd").textContent=Math.round(carry*ROUND_FACTOR);
   if(fresh){
     pan.classList.add("big");
     const t0=performance.now(),dur=650;
     const run=now=>{
       const u=Math.min(1,(now-t0)/dur),e=1-(1-u)**3;
-      set(Math.round(r.carry*e),(r.V*e).toFixed(1),(r.la*e).toFixed(1));
+      set(Math.round(carry*e),(r.V*e).toFixed(1),(r.la*e).toFixed(1));
       if(u<1)requestAnimationFrame(run);else setTimeout(()=>pan.classList.remove("big"),2300);
     };
-    requestAnimationFrame(run);setTimeout(()=>{if(pan.classList.contains("big"))set(Math.round(r.carry),r.V.toFixed(1),r.la.toFixed(1));},900);
-  }else{pan.classList.remove("big");set(Math.round(r.carry),r.V.toFixed(1),r.la.toFixed(1));}
+    requestAnimationFrame(run);setTimeout(()=>{if(pan.classList.contains("big"))set(Math.round(carry),r.V.toFixed(1),r.la.toFixed(1));},900);
+  }else{pan.classList.remove("big");set(Math.round(carry),r.V.toFixed(1),r.la.toFixed(1));}
   const lv=r.conf>=.6?["ok","信頼度 高"]:r.conf>=.3?["warn","信頼度 中"]:["ng","信頼度 低"];
   $("confDot").className="dot "+lv[0];
   $("confT").textContent=lv[1]+`・${r.n}コマ`+(x.S.hzSet?"":"・傾き未補正")+(r.n<4?"・標準値の影響大":"");
@@ -1396,7 +1586,7 @@ function renderSheet(){
   tiles($("sheetTiles"),[
     {k:"信頼度",v:`${Math.round(r.conf*100)}<small>%</small>`,st:r.conf>=.6?"ok":r.conf>=.3?"warn":"ng",s:`追跡 ${r.n}コマ${r.dropped?"（1点除外）":""}`},
     {k:"当てはめ誤差",v:`${r.F.rms.toFixed(2)}<small>px</small>`,s:`一点除外のばらつき ${fix(r.sdJ)} m/s`},
-    {k:"ラウンド換算の飛距離",v:`${Math.round(r.roundYd)}<small>yds</small>`,s:`練習場での値の ${ROUND_FACTOR.toFixed(2)} 倍（ドライバー基準の目安）`,wide:true},
+    {k:"ラウンド換算の飛距離",v:`${Math.round(carryOf(x)*ROUND_FACTOR)}<small>yds</small>`,s:`練習場での値の ${ROUND_FACTOR.toFixed(2)} 倍（ドライバー基準の目安）`,wide:true},
     {k:"左右方向",v:`${r.psi>=0?"右":"左"} ${Math.abs(r.psi).toFixed(1)}<small>°</small>`,s:"カメラの向きが基準"},
     {k:"測定のみの初速",v:`${r.raw.toFixed(1)}<small>m/s</small>`,s:Math.abs(r.priorShift)<.05?"標準値の影響なし":`標準値の影響 ${r.priorShift>0?"+":""}${r.priorShift.toFixed(1)} m/s`},
     {k:"頂点の高さ",v:`${r.apex.toFixed(0)}<small>m</small>`,s:"計算値"},
@@ -1404,6 +1594,9 @@ function renderSheet(){
     {k:"仮定のスピン",v:`${r.rpm}<small>rpm</small>`,s:`${x.S.club} の標準値（仮）`},
     {k:"カメラ〜ボール",v:`${r.Z.toFixed(2)}<small>m</small>`,s:`直径 ${x.S.d.toFixed(1)}px / ${x.S.mm}mm / ${x.S.fps}fps`},
   ]);
+  const cal=calOf(x.S.club);
+  $("landIn").value=x.landing||"";
+  $("landNote").textContent=cal.n>=CAL_MIN?`${x.S.club} は入力 ${cal.n}球から ×${cal.f.toFixed(2)} で補正中です（計算値 ${Math.round(r.carry)}yd）`:`${x.S.club} はあと${CAL_MIN-cal.n}球の入力で補正を始めます`;
   $("sheetNote").textContent="測定しているのは飛び出した直後の初速と打ち出し角です。スピンは測れないためクラブ別の標準値を仮定しており、キャリー・弾道ライン・ミニマップは、そこから計算したものです。キャリーは練習場の球での値で、ラウンド換算はラウンドの平均飛距離を基準にした目安です。";
 }
 function stopPump(){if(P.sig){P.sig.stop=true;P.sig=null;}}
@@ -1531,7 +1724,11 @@ ro.onclick=ev=>{
 };
 $("rBack").onclick=()=>{closeReview();};
 $("rDel").onclick=()=>{
-  const i=shots.indexOf(P.shot);if(i>=0)shots.splice(i,1);
+  if(!confirm("このショットの記録を削除します"))return;
+  const x=P.shot,i=shots.indexOf(x);if(i>=0)shots.splice(i,1);
+  dbDel("shots",x.id).catch(()=>{});
+  // The same video can belong to several shots.
+  if(!shots.some(o=>o.rec.clipKey===x.rec.clipKey))dbDel("clips",x.rec.clipKey).catch(()=>{});
   closeReview();renderShots();
 };
 $("rSpeed").onclick=()=>{$("speeds").hidden=!$("speeds").hidden;};
@@ -1565,8 +1762,9 @@ function addFixPoint(ev){
   x.manual=pts;
   if(pts.length>=3){
     const r=solveShot(x.S,pts);
-    if(r){x.res=r;layoutShot();updatePanel(false);renderShots();drawMiniBase();}
+    if(r){x.res=r;layoutShot();}
   }else{x.res=null;}
+  saveShot(x);updatePanel(false);renderShots();drawMiniBase();
   stepTo(Math.min(P.b,P.idx+1));
 }
 
@@ -1632,7 +1830,7 @@ $("btnCopy").onclick=async()=>{
   catch(e){const r=document.createRange();r.selectNodeContents($("report"));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent="選択しました → コピーしてください";}
   setTimeout(()=>b.textContent="結果をコピー",2500);
 };
-renderCam();updReport();
+renderCam();updReport();loadHistory();
 </script>
 </body>
 </html>
