@@ -222,7 +222,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">v1.2</div>
+  <div class="ver">v1.3</div>
 </header>
 
 <main>
@@ -294,11 +294,11 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
       <b>ライブラリ</b><small>撮影済みのスロー動画を選ぶ</small>
       <input type="file" id="fLib" accept="video/*">
     </label>
-    <label class="bigbtn">
+    <div class="bigbtn" style="cursor:default">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
-      <b>撮影する</b><small>iPhoneの撮影画面を呼び出す</small>
-      <input type="file" id="fCap" accept="video/*" capture="environment">
-    </label>
+      <b>撮り方</b><small>カメラアプリの「スロー」で、打席の真後ろから1倍で撮影。撮ったら左から選びます</small>
+      <input type="file" id="fCap" hidden>
+    </div>
   </div>
   <div id="shotsWrap" hidden>
     <div class="eyebrow">今回のショット</div>
@@ -434,7 +434,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="1.2";
+const APP_VERSION="1.3";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -1047,7 +1047,7 @@ function trackBall(cands,I,last,tee,d,fps){
         }
         if(!L){
           const dx=c.x-tee.x,dy=c.y-tee.y,D=Math.hypot(dx,dy);
-          if(dy>-d*.3||D<d*.5||D>maxStep*(i-I+1.5))continue;
+          if(dy>d*.5||D<d*.5||D>maxStep*(i-I+1.5))continue; // seen from off the target line the ball first moves sideways, but never clearly down
         }else if(h.p.length===1){
           const gap=i-L.i,sx=(c.x-L.x)/gap,sy=(c.y-L.y)/gap,vx=L.x-tee.x,vy=L.y-tee.y,S=Math.hypot(sx,sy),U=Math.hypot(vx,vy);
           if(S>maxStep||S<1)continue;
@@ -1081,7 +1081,10 @@ function trackBall(cands,I,last,tee,d,fps){
 /* ---------- solving ---------- */
 const RS_MAX=.0075,RS_FRAC=.9; // sensor readout: fit error and window stability on real 120fps footage are best near 8ms; assumed no slower at lower rates
 const BALL_M=.0427;
-const CD_FACTOR=1.092; // fitted to two SmartTrack driver readings at 2700rpm
+// Drag = CD_A + CD_B * spin parameter: fitted to tour-average driver (171mph, 10.4deg, 2545rpm, 282yd) and 7-iron
+// (123mph, 16.3deg, 7097rpm, 176yd) shots. A drag rising as steeply with spin as the earlier model made irons fall far short.
+const CD_A=.215,CD_B=.33;
+const CD_FACTOR=1.076; // range balls: fitted to two SmartTrack driver readings at the range (204yd, 202yd)
 const CLUBS=[{id:"D",v:58,rpm:2700},{id:"3W",v:53,rpm:3600},{id:"UT",v:47,rpm:4400},{id:"5I",v:45,rpm:5300},{id:"7I",v:41,rpm:6500},{id:"9I",v:36,rpm:8000},{id:"PW",v:33,rpm:9000}];
 const PRIOR_SD=8;
 const ROUND_FACTOR=240/202; // owner's round average (230-250yd) over the driver distance measured at the range with range balls
@@ -1123,8 +1126,9 @@ function fitAt(pts,c,tau){
   return{Bx:s[0],By:s[1],k:s[2],tau,rms:Math.sqrt(e/pts.length)};
 }
 function fitTee(pts,c){
-  // The first tracked frame cannot be far from the frame where the ball left the tee.
-  const gap=c.impact==null?null:pts[0].i-c.impact,lo=gap==null?.02:Math.max(.02,gap-1),hi=gap==null?Math.ceil(c.fps*.05)+1:gap+1.5;
+  // The detected impact frame is when the ball first stops looking like itself, which can be the club arriving a frame or two early,
+  // so it only bounds how late the first tracked frame can be.
+  const gap=c.impact==null?null:pts[0].i-c.impact,lo=.02,hi=gap==null?Math.ceil(c.fps*.05)+1:Math.max(1,gap+1.5);
   let best=null;
   for(let t=lo;t<=hi;t+=.04){const f=fitAt(pts,c,t);if(f&&(!best||f.rms<best.rms))best=f;}
   if(!best)return null;
@@ -1137,7 +1141,7 @@ function simFlight(V,la,rpm){
   let x=0,y=0,vx=V*Math.cos(a),vy=V*Math.sin(a),w=rpm*2*Math.PI/60,t=0,apex=0;
   const out=[{t:0,s:0,h:0}];
   for(let i=0;i<3000;i++){
-    const sp=Math.hypot(vx,vy),S=w*r/sp,Cd=(.171+.62*S)*CD_FACTOR,Cl=.54*Math.pow(S,.4),q=.5*rho*A*sp/m;
+    const sp=Math.hypot(vx,vy),S=w*r/sp,Cd=(CD_A+CD_B*S)*CD_FACTOR,Cl=.54*Math.pow(S,.4),q=.5*rho*A*sp/m;
     const ax=-q*(Cd*vx+Cl*vy),ay=-g+q*(Cl*vx-Cd*vy);
     vx+=ax*dt;vy+=ay*dt;x+=vx*dt;y+=vy*dt;t+=dt;w*=1-.04*dt;
     if(y<0){out.push({t,s:x,h:0});break;}
@@ -1197,6 +1201,25 @@ function solveShot(S,rawPts){
   return{V,raw,la,psi,club:club.id,rpm:club.rpm,carry:sim.carry,roundYd:sim.carry*ROUND_FACTOR,apex:sim.apex,flight:sim.flight,line,pts,dropped,F,sdJ,conf,n,Z,f,priorShift:V-raw};
 }
 
+/* A rate twice too high doubles the speed, so of 120 and 240 keep the one that gives a ball speed nearest the club's typical one. */
+function pickFps(hyps){
+  const club=CLUBS.find(x=>x.id===S.club)||CLUBS[0],keep=S.fps;let best=null;
+  for(const f of[120,240]){
+    S.fps=f;
+    for(const p0 of hyps){
+      const p=p0.filter(q=>q.i<=p0[0].i+Math.ceil(f*FIT_WINDOW));
+      if(p.length<3)continue;
+      const r=solveShot(S,p);
+      if(!r||r.F.rms>4)continue;
+      const miss=Math.abs(Math.log(r.raw/club.v));
+      if(!best||miss<best.miss)best={f,miss};
+    }
+  }
+  S.fps=keep;
+  if(best)S.fpsGuess=true;
+  return best?best.f:keep;
+}
+
 /* ---------- common UI ---------- */
 function toast(msg){
   document.querySelectorAll(".toast").forEach(x=>x.remove());
@@ -1216,13 +1239,17 @@ function toVideo(cv,ev,m){
 /* ---------- setup screen ---------- */
 let S=null;
 const sb=$("sBase"),so=$("sOver"),sbx=sb.getContext("2d"),sox=so.getContext("2d");
-/* Even frame timing means the file plays at its capture rate. A slow-motion export has uneven timing at its ends and stores about 30fps, so its capture rate cannot be read from the file. */
-function captureFps(avg,rates){
-  const even=rates.every(r=>Math.abs(r.fps-avg)<avg*.06);
-  if(avg>=200)return{fps:240,known:true};
-  if(avg>=100)return{fps:120,known:true};
-  if(!even)return{fps:120,known:false};
-  return avg>=45?{fps:60,known:true}:{fps:30,known:true};
+/* iPhone marks ordinary video with full-frame-rate-playback-intent=1 and slow motion with 0. Slow motion is stored at about 30fps
+   (stretched), even timing or not, so its capture rate cannot be read and is settled after tracking (see pickFps). */
+function captureFps(avg,rates,meta){
+  const top=rates[0]?rates[0].fps:avg,total=rates.reduce((a,r)=>a+r.count,0)||1;
+  const share=rates.filter(r=>Math.abs(r.fps-top)<top*.06).reduce((a,r)=>a+r.count,0)/total;
+  const rate=share>=.95?top:avg,key=Object.keys(meta||{}).find(k=>k.includes("full-frame-rate-playback-intent"));
+  const snap=v=>v>=200?240:v>=100?120:v>=45?60:30;
+  if(rate>=100)return{fps:snap(rate),known:true};
+  if(key&&+meta[key]===1)return{fps:snap(rate),known:true};
+  if(share>=.95&&rate>=45)return{fps:snap(rate),known:true}; // slow-motion exports are about 30fps
+  return{fps:120,known:false};
 }
 async function loadMovie(f,src){
   const{meta,tracks}=await readMoov(f);
@@ -1241,15 +1268,15 @@ async function openFile(f,src){
   sbx.clearRect(0,0,sb.width,sb.height);sox.clearRect(0,0,so.width,so.height);
   busy("動画を読み込んでいます",f.name,.1);
   try{
-    const{m,mm,avg}=await loadMovie(f,src),{W,H,frames}=m;
+    const{m,mm,avg}=await loadMovie(f,src),{W,H,frames}=m,cf=captureFps(avg,m.frames.t.rates,m.meta);
     S={m,frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
-      hz:[{x:W*.22,y:H*.42},{x:W*.78,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:captureFps(avg,m.frames.t.rates).fps,fpsFromFile:captureFps(avg,m.frames.t.rates).known,mm:mm||26,mmFromFile:!!mm};
+      hz:[{x:W*.22,y:H*.42},{x:W*.78,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:cf.fps,fpsFromFile:cf.known,mm:mm||25,mmFromFile:!!mm}; // slow motion that kept its metadata reads 25mm (1x); exports lose it
     sb.width=so.width=W;sb.height=so.height=H;
     R.decoder=frames.mode;
     $("sFrame").max=frames.n-1;$("sFrame").value=0;
     renderClubs();renderOpts();layoutSetup();
-    S.normalVideo=S.fps===30;
-    if(S.normalVideo)toast("30fpsの動画はボールが1コマで飛び去るので測定できません。スロー動画を書き出したものなら、撮影fpsを直してください");
+    S.normalVideo=S.fpsFromFile&&S.fps===30;
+    if(S.normalVideo)toast("30fpsの通常の動画です。ボールが1コマで飛び去るので測定できません。カメラの「スロー」で撮ってください");
     else if(S.fps===60&&S.fpsFromFile)toast("60fpsの動画です。測定できますが、120fps以上より精度が下がります");
     await seekSetup(0);
     drawSetup();
@@ -1325,7 +1352,7 @@ $("optSum").onclick=e=>{
 window.addEventListener("resize",()=>{if(S&&!$("setup").hidden)layoutSetup();});
 document.querySelectorAll(".opt button").forEach(b=>b.onclick=()=>{
   const m=b.dataset.d.match(/^([a-z]+)([+-]1)$/),k=m[1],s=+m[2];
-  if(k==="fps"){const L=[30,60,120,240],i=L.indexOf(S.fps);S.fps=L[Math.max(0,Math.min(3,i+s))];S.normalVideo=S.fps===30;}
+  if(k==="fps"){const L=[30,60,120,240],i=L.indexOf(S.fps);S.fps=L[Math.max(0,Math.min(3,i+s))];S.normalVideo=S.fps===30;S.fpsFromFile=true;S.fpsGuess=false;} // set by hand: no guessing
   if(k==="mm"){S.mm=Math.max(13,Math.min(240,S.mm+s));S.mmFromFile=false;}
   if(k==="d"){S.d=Math.max(4,S.d+s*.5);S.dManual=true;}
   renderOpts();drawSetup();
@@ -1398,11 +1425,12 @@ $("sBack").onclick=()=>{$("setup").hidden=true;busy(null);};
 async function runAnalysis(){
   const m=S.m,fr=m.frames,tee=S.tee;
   const start=Math.min(S.teeFrame==null?S.frame:S.teeFrame,fr.n-1);
-  const mr=Math.max(24,Math.round(S.d*2.2)),mw=mr*2+1,pr=Math.max(8,Math.round(S.d*.75));
+  // Watch only the inside of the ball: at address the club head sits right next to it and moves away on the takeaway.
+  const mr=Math.max(24,Math.round(S.d*2.2)),mw=mr*2+1,pr=Math.max(4,Math.round(S.d*.4));
   const pc=document.createElement("canvas");pc.width=pc.height=mw;
   const px=pc.getContext("2d",{willReadFrequently:true});
-  const crop=Y=>{const o=[];for(let y=mr-pr;y<=mr+pr;y++)for(let x=mr-pr;x<=mr+pr;x++)o.push(Y[y*mw+x]);return o;};
-  let tmpl=null,lows=0,first=-1,I=-1,seen=0;
+  const crop=Y=>{const o=[];for(let y=mr-pr;y<=mr+pr;y++)for(let x=mr-pr;x<=mr+pr;x++)if((x-mr)**2+(y-mr)**2<=pr*pr)o.push(Y[y*mw+x]);return o;};
+  let tmpl=null,lows=0,first=-1,I=-1,seen=0,uncovered=0;
   const need=Math.max(4,Math.round(S.fps*.05)),sig={},total=fr.n-start;
   busy("インパクトを探しています","ボールがテーから消えるコマを探します",0);
   await fr.iterate(start,fr.n-1,async(f,i)=>{
@@ -1411,7 +1439,17 @@ async function runAnalysis(){
     if(!tmpl)tmpl=c;
     if(ncc(tmpl,c)<.7){
       if(!lows)first=i;
-      if(++lows>=need){I=first;sig.stop=true;}
+      if(++lows>=need){
+        // From behind, the club head hides the ball at address and uncovers it on the takeaway. A ball still sitting there means it was not the impact.
+        // The ball measured at a half-hidden moment can be too small, so look for any ball-sized circle and take its size from here on.
+        const q=fitBallCircle(px.getImageData(0,0,mw,mw).data,mw,mw,mr,mr,Math.round(S.d*.4)+2,Math.max(3,Math.round(S.d*.3)),Math.round(S.d*.8)+2);
+        // A ball has a clear edge all the way round (score ~70 on real footage); an empty tee or the hole in the mat scores ~15.
+        if(q&&q.sc>=35&&q.d>S.d*.6&&q.d<S.d*1.6){
+          tmpl=c;lows=0;uncovered++;
+          S.tee={x:Math.round(tee.x)-mr+q.x,y:Math.round(tee.y)-mr+q.y};
+        }
+        else{I=first;sig.stop=true;}
+      }
     }else lows=0;
     if(!(++seen%12)){busy("インパクトを探しています","ボールがテーから消えるコマを探します",seen/total*.6);await wait(0);}
   },sig);
@@ -1421,8 +1459,9 @@ async function runAnalysis(){
   const fitA=Math.max(start,I-Math.round(S.fps*.16)),fitB=Math.max(start,I-Math.round(S.fps*.04)),fits=[];
   await fr.iterate(fitA,fitB,async f=>{
     drawFrame(px,f,m,Math.round(tee.x)-mr,Math.round(tee.y)-mr);
-    const q=fitBallCircle(px.getImageData(0,0,mw,mw).data,mw,mw,mr,mr,3,Math.max(3,Math.round(S.d/2)-3),Math.round(S.d/2)+3);
-    if(q)fits.push(q);
+    // The same search as for the tap, because the size taken at a half-hidden moment may be off either way.
+    const k=Math.max(m.W,m.H)/1920,q=fitBallCircle(px.getImageData(0,0,mw,mw).data,mw,mw,mr,mr,4,Math.max(3,Math.round(k*4)),Math.min(mr-4,Math.round(k*34)));
+    if(q&&q.sc>=35)fits.push(q);
   });
   if(fits.length>=3){
     const mid=k=>{const v=fits.map(q=>q[k]).sort((a,b)=>a-b);return v[v.length>>1];};
@@ -1434,7 +1473,9 @@ async function runAnalysis(){
   const x0=Math.max(0,Math.round(tee.x)-rx),x1=Math.min(W,Math.round(tee.x)+rx),y0=Math.max(0,Math.round(tee.y)-up),y1=Math.min(H,Math.round(tee.y+S.d*2));
   const w=x1-x0,h=y1-y0,rc=document.createElement("canvas");rc.width=w;rc.height=h;
   const rxx=rc.getContext("2d",{willReadFrequently:true});
-  const a=Math.max(0,I-1),b=Math.min(fr.n-1,I+Math.ceil(S.fps*FIT_WINDOW)+2),Ys={};
+  // Slow motion of unknown rate: track over enough frames for 240fps, then decide.
+  const trackFps=S.fpsFromFile?S.fps:240;
+  const a=Math.max(0,I-1),b=Math.min(fr.n-1,I+Math.ceil(trackFps*FIT_WINDOW)+2),Ys={};
   busy("ボールを追跡しています","",.65);
   await fr.iterate(a,b,async(f,i)=>{
     drawFrame(rxx,f,m,x0,y0);Ys[i]=lumaOf(rxx,w,h);
@@ -1443,7 +1484,8 @@ async function runAnalysis(){
   });
   const A0=Math.PI*S.d*S.d/4,cands={};
   for(let i=a+1;i<b;i++)if(Ys[i-1]&&Ys[i]&&Ys[i+1])cands[i]=findCands(Ys[i-1],Ys[i],Ys[i+1],w,h,A0,x0,y0,S.tee);
-  const hyps=trackBall(cands,I,b-1,S.tee,S.d,S.fps);
+  const hyps=trackBall(cands,I,b-1,S.tee,S.d,S.fpsFromFile?S.fps:120);
+  if(!S.fpsFromFile)S.fps=pickFps(hyps);
   busy("計算しています","",.95);
   await wait(0);
   let best=null,bestScore=-1e9;
@@ -1681,7 +1723,7 @@ function updatePanel(fresh){
   }else{pan.classList.remove("big");set(Math.round(carry),r.V.toFixed(1),r.la.toFixed(1));}
   const lv=r.conf>=.6?["ok","信頼度 高"]:r.conf>=.3?["warn","信頼度 中"]:["ng","信頼度 低"];
   $("confDot").className="dot "+lv[0];
-  $("confT").textContent=lv[1]+`・${r.n}コマ`+(x.S.fps<100?`・${x.S.fps}fps`:"")+(x.S.hzSet?"":"・傾き未補正")+(r.n<4?"・標準値の影響大":"");
+  $("confT").textContent=lv[1]+`・${r.n}コマ`+(x.S.fps<100?`・${x.S.fps}fps`:x.S.fpsGuess?`・${x.S.fps}fps(推定)`:"")+(x.S.hzSet?"":"・傾き未補正")+(r.n<4?"・標準値の影響大":"");
   renderSheet();
 }
 function renderSheet(){
