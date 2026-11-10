@@ -149,6 +149,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;min-width:44px;padding:7px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--sub);font:inherit;font-size:13px;font-weight:700}
+.chips button:disabled{opacity:.4}
 .chips button.on{background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--accInk);border-color:transparent}
 .optsum{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;color:var(--sub);font:inherit;font-size:12.5px;padding:2px 4px}
 .optsum b{color:var(--fg);font-weight:600}.optsum .warn{color:var(--warn)}
@@ -222,7 +223,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <header class="bar">
   <div class="logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0b1a06" stroke-width="2.4" stroke-linecap="round"><path d="M4 20 C9 6 15 4 20 6"/><circle cx="20" cy="6" r="1.6" fill="#0b1a06"/></svg></div>
   <div class="brand">Shot<span>Kaiseki</span></div>
-  <div class="ver">v1.3.1</div>
+  <div class="ver">v1.4</div>
 </header>
 
 <main>
@@ -358,6 +359,8 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
       <input type="range" id="sFrame" min="0" max="0" value="0">
       <button id="sNext" aria-label="次のコマ"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l10-7z"/></svg></button>
     </div>
+    <div class="chips"><button id="sFind" disabled>打った場面を探す</button></div>
+    <div class="chips" id="shotList" hidden></div>
     <div class="hint" id="h2"><i>2</i>線を動かして、遠くの地面の端に合わせる<small id="h2s">傾きの補正</small></div>
     <div class="chips" id="clubs"></div>
     <button class="optsum" id="optSum"><span id="optTxt"></span><i>›</i></button>
@@ -372,6 +375,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
     <b id="busyT">読み込み中</b>
     <div class="pbar"><span id="busyP"></span></div>
     <small id="busyS"></small>
+    <div class="chips" id="shotCancel" hidden><button id="sCancel">中止</button></div>
   </div>
 </div>
 
@@ -434,7 +438,7 @@ pre{white-space:pre-wrap;word-break:break-all;font:12px/1.55 ui-monospace,Menlo,
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const APP_VERSION="1.3.1";
+const APP_VERSION="1.4";
 const R={version:APP_VERSION,device:{ua:navigator.userAgent,screen:`${screen.width}x${screen.height} @${devicePixelRatio}`},camera:{},file:{}};
 let stream=null,track=null,showDiff=false,landscape=false,fpsSel=60,resSel="1920x1080";
 
@@ -1263,13 +1267,14 @@ async function loadMovie(f,src){
 }
 async function openFile(f,src){
   if(!f)return;
-  $("setup").hidden=false;$("sGo").disabled=true;
+  $("setup").hidden=false;$("sGo").disabled=true;$("sFind").disabled=true;
+  $("shotList").innerHTML="";$("shotList").hidden=true;layoutSetup();
   document.querySelectorAll(".toast").forEach(x=>x.remove());
   sbx.clearRect(0,0,sb.width,sb.height);sox.clearRect(0,0,so.width,so.height);
   busy("動画を読み込んでいます",f.name,.1);
   try{
     const{m,mm,avg}=await loadMovie(f,src),{W,H,frames}=m,cf=captureFps(avg,m.frames.t.rates,m.meta);
-    S={m,frame:0,tee:null,d:Math.round(Math.max(W,H)/1920*22),dManual:false,
+    S={m,frame:0,tee:null,shots:[],d:Math.round(Math.max(W,H)/1920*22),dManual:false,
       hz:[{x:W*.22,y:H*.42},{x:W*.78,y:H*.42}],hzSet:false,club:(S&&S.club)||"D",fps:cf.fps,fpsFromFile:cf.known,mm:mm||25,mmFromFile:!!mm}; // slow motion that kept its metadata reads 25mm (1x); exports lose it
     sb.width=so.width=W;sb.height=so.height=H;
     R.decoder=frames.mode;
@@ -1323,7 +1328,7 @@ function drawSetup(){
   $("h1s").textContent=S.tee?`カメラから約${ballDistance().toFixed(2)}m・コマ ${S.frame+1}`:"";
   $("h2").classList.toggle("done",S.hzSet);
   $("h2s").textContent=S.hzSet?`傾き ${pitchText()}`:"傾きの補正";
-  $("sGo").disabled=!S.tee;
+  $("sGo").disabled=!S.tee;$("sFind").disabled=!S.tee;
 }
 /* Straight-line distance from the camera to the ball, as a tape measure would give it: checks the focal length and ball size together. */
 function ballDistance(){
@@ -1425,6 +1430,82 @@ const stepSetup=d=>{const i=Math.max(0,Math.min(S.m.frames.n-1,+$("sFrame").valu
 $("sPrev").onclick=()=>stepSetup(-1);
 $("sNext").onclick=()=>stepSetup(1);
 $("sBack").onclick=()=>{$("setup").hidden=true;busy(null);};
+
+function renderShotList(){
+  const list=$("shotList"),n=S.m.frames.n;
+  list.innerHTML=S.shots.map((i,k)=>`<button data-i="${i}">${k+1}球目${i<n*.12||i>(n-1)*.88?" (端)":""}</button>`).join("");
+  list.hidden=!S.shots.length;
+  list.querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+    const i=Math.max(0,+b.dataset.i-Math.round(S.fps*.3));
+    $("sFrame").value=i;S.teeFrame=i;
+    list.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+    await seekSetup(i);drawSetup();
+  });
+  layoutSetup();
+}
+async function findShots(){
+  if(!S||!S.tee||!$("busy").hidden)return;
+  const s=S,m=s.m,fr=m.frames,d=s.d,tee={...s.tee},sig={},out=[];
+  const mr=Math.max(16,Math.ceil(d*1.3)),mw=mr*2+1,pr=Math.max(1,Math.round(d*.4));
+  const ox=Math.round(tee.x)-mr,oy=Math.round(tee.y)-mr,minGone=Math.max(8,Math.round(s.fps*.25));
+  const pc=document.createElement("canvas");pc.width=pc.height=mw;
+  const px=pc.getContext("2d",{willReadFrequently:true});
+  const crop=Y=>{const c=[];for(let y=mr-pr;y<=mr+pr;y++)for(let x=mr-pr;x<=mr+pr;x++)if((x-mr)**2+(y-mr)**2<=pr*pr)c.push(Y[y*mw+x]);return c;};
+  let tmpl=null,seen=0,first=-1,gone=0,armed=false,roll=[];
+  const lr=Math.ceil(d*4),lw=lr*2+1,sc=Math.min(1,20/d),rw=Math.ceil(lw*sc),rd=d*sc,rc=lr*sc;
+  const lc=document.createElement("canvas"),tc=document.createElement("canvas");
+  lc.width=lc.height=lw;tc.width=tc.height=rw;
+  const lx=lc.getContext("2d"),tx=tc.getContext("2d",{willReadFrequently:true});
+  const valid=q=>q&&q.sc>=35&&q.d>=d*.6&&q.d<=d*1.5;
+  $("shotCancel").hidden=false;$("sCancel").onclick=()=>{sig.stop=true;};
+  busy("打った場面を探しています","",0);
+  try{
+    // Finish any scrub decode before using the same Safari video for the scan.
+    if(sfSig)sfSig.stop=true;
+    sfWant=-1;
+    while(sfBusy&&!sig.stop)await wait(0);
+    if(sig.stop)return;
+    px.drawImage(sb,-ox,-oy);tmpl=crop(lumaOf(px,mw,mw));
+    await fr.iterate(0,fr.n-1,async(f,i)=>{
+      if(sig.stop)return;
+      px.clearRect(0,0,mw,mw);drawFrame(px,f,m,ox,oy);
+      const c=crop(lumaOf(px,mw,mw));
+      let present=ncc(tmpl,c)>=.7;
+      if(!present){
+        const q=fitBallCircle(px.getImageData(0,0,mw,mw).data,mw,mw,mr,mr,Math.round(d*.4),Math.max(1,Math.floor(d*.3)),Math.ceil(d*.75));
+        if(valid(q)){present=true;tmpl=c;}
+      }
+      if(present){seen++;gone=0;first=-1;armed=false;roll=[];}
+      else{
+        if(!gone){first=i;armed=seen>=10;roll=[];}
+        seen=0;gone++;
+        if(armed&&gone>=2&&gone<=8){
+          lx.clearRect(0,0,lw,lw);drawFrame(lx,f,m,Math.round(tee.x)-lr,Math.round(tee.y)-lr);
+          tx.clearRect(0,0,rw,rw);tx.drawImage(lc,0,0,lw*sc,lw*sc);
+          // Bound the circle search cost even when the source is a large video.
+          const q=fitBallCircle(tx.getImageData(0,0,rw,rw).data,rw,rw,Math.round(rc),Math.round(rc),Math.floor(rd*3.2),Math.max(1,Math.floor(rd*.3)),Math.ceil(rd*.75));
+          // A rolled ball stays down at mat level; a struck one climbs above the tee.
+          if(q&&q.sc>=35&&q.d>=rd*.6&&q.d<=rd*1.5&&Math.hypot(q.x-rc,q.y-rc)>rd*.3&&q.y>rc-rd)roll.push({i,x:q.x/sc,y:q.y/sc});
+        }
+        if(armed&&gone===minGone){
+          // A struck ball is out of a 4-ball-wide window within a frame or two; one pushed or rolled by the club is still in it a few frames later.
+          if(roll.length<3)out.push(first);
+          armed=false;
+        }
+      }
+      if((i+1)%20===0||i===fr.n-1){busy("打った場面を探しています","",(i+1)/fr.n);await wait(0);}
+    },sig);
+    if(!sig.stop){
+      s.shots=out;renderShotList();
+      if(!out.length)toast("打った場面が見つかりませんでした。素振りだけの動画かもしれません");
+      else if(out.some(i=>i<fr.n*.12||i>(fr.n-1)*.88))toast("動画の端に近いショットは、スローになっていない部分で時間がずれることがあります");
+    }
+  }catch(e){if(!sig.stop)toast("探せませんでした："+e.message);}
+  finally{
+    $("shotCancel").hidden=true;$("sCancel").onclick=null;busy(null);
+  }
+}
+$("sFind").onclick=findShots;
 
 /* ---------- analysis ---------- */
 async function runAnalysis(){
